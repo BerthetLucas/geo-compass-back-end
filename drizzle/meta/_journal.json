@@ -15,6 +15,20 @@
       "when": 1779727960544,
       "tag": "0001_stale_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779736557453,
+      "tag": "0002_late_madrox",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779736730930,
+      "tag": "0003_oval_nova",
+      "breakpoints": true
     }
   ]
 }

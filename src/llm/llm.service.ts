@@ -1,10 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { type AxiosResponse } from 'axios';
-import { DB, type Database } from 'src/db/db.module';
-import { llmResponseTable } from 'src/db/schema';
 import {
   type ChatMessage,
   type LlmResponse,
@@ -12,6 +10,7 @@ import {
 } from './llm.types';
 import { SYSTEM_PROMPT } from './constants/system-prompt';
 import { OPENROUTER_API_URL } from './constants/open-router-url';
+import { LlmRepository } from './llm.repository';
 
 export type { LlmResponse } from './llm.types';
 
@@ -20,7 +19,7 @@ export class LlmService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-    @Inject(DB) private readonly db: Database,
+    private readonly llmRepository: LlmRepository,
   ) {}
 
   async sendLlmQuery(
@@ -49,7 +48,7 @@ export class LlmService {
     );
 
     return {
-      model,
+      model: this.normalizeModelName(model),
       text: response.data.choices[0].message.content,
       durationMs: Date.now() - start,
     };
@@ -63,13 +62,13 @@ export class LlmService {
       models.map((model) => this.sendLlmQuery(messages, model)),
     );
 
-    await this.db.insert(llmResponseTable).values(
-      responses.map((response) => ({
-        model: response.model,
-        response: response.text,
-      })),
-    );
+    await this.llmRepository.insertResponses(responses);
 
     return responses;
+  }
+
+  private normalizeModelName(model: string): string {
+    const beforeSlash = model.split('/')[0];
+    return beforeSlash.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   }
 }

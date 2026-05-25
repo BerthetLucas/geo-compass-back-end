@@ -1,4 +1,6 @@
 import {
+  date,
+  index,
   integer,
   pgTable,
   text,
@@ -12,3 +14,28 @@ export const llmResponseTable = pgTable('llm_responses', {
   response: text().notNull(),
   createdAt: timestamp().defaultNow().notNull(),
 });
+
+export const globalRankingsTable = pgTable(
+  'global_rankings',
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    date: date().notNull(),
+    brand: varchar({ length: 255 }).notNull(),
+    mentions: integer().notNull(),
+    rank: integer().notNull(),
+  },
+  (table) => [index('global_rankings_date_idx').on(table.date)],
+);
+
+export const modelRankingsTable = pgTable(
+  'model_rankings',
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    date: date().notNull(),
+    model: varchar({ length: 255 }).notNull(),
+    brand: varchar({ length: 255 }).notNull(),
+    mentions: integer().notNull(),
+    rank: integer().notNull(),
+  },
+  (table) => [index('model_rankings_date_idx').on(table.date)],
+);
