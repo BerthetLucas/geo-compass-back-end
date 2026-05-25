@@ -14,6 +14,15 @@ export class PromptRepository {
     return rows.map((row) => ({ text: row.text, isActive: row.isActive }));
   }
 
+  async getActivePrompts(): Promise<PromptResponse[]> {
+    const rows = await this.db
+      .select()
+      .from(promptsTable)
+      .where(eq(promptsTable.isActive, true));
+
+    return rows.map((row) => ({ text: row.text, isActive: row.isActive }));
+  }
+
   async addPrompt(text: string): Promise<void> {
     await this.db.insert(promptsTable).values({ text });
   }

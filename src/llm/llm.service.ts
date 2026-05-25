@@ -11,6 +11,7 @@ import {
 import { SYSTEM_PROMPT } from './constants/system-prompt';
 import { OPENROUTER_API_URL } from './constants/open-router-url';
 import { LlmRepository } from './llm.repository';
+import { PromptRepository } from 'src/prompt/prompt.repository';
 
 export type { LlmResponse } from './llm.types';
 
@@ -20,6 +21,7 @@ export class LlmService {
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly llmRepository: LlmRepository,
+    private readonly promptRepository: PromptRepository,
   ) {}
 
   async sendLlmQuery(
@@ -54,13 +56,23 @@ export class LlmService {
     };
   }
 
-  async sendLlmQueries(
-    messages: ChatMessage[],
-    models: string[],
-  ): Promise<LlmResponse[]> {
-    const responses = await Promise.all(
-      models.map((model) => this.sendLlmQuery(messages, model)),
-    );
+  async sendLlmQueries(models: string[]): Promise<LlmResponse[]> {
+    const activePrompts = await this.promptRepository.getActivePrompts();
+
+    const responses = (
+      await Promise.all(
+        activePrompts.map((prompt) =>
+          Promise.all(
+            models.map((model) =>
+              this.sendLlmQuery(
+                [{ role: 'user', content: prompt.text }],
+                model,
+              ),
+            ),
+          ),
+        ),
+      )
+    ).flat();
 
     await this.llmRepository.insertResponses(responses);
 

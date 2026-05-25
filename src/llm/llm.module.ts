@@ -3,10 +3,11 @@ import { HttpModule } from '@nestjs/axios';
 import { LlmController } from './llm.controller';
 import { LlmService } from './llm.service';
 import { LlmRepository } from './llm.repository';
+import { PromptRepository } from 'src/prompt/prompt.repository';
 
 @Module({
   imports: [HttpModule],
-  providers: [LlmService, LlmRepository],
+  providers: [LlmService, LlmRepository, PromptRepository],
   exports: [LlmService],
   controllers: [LlmController],
 })
