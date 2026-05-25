@@ -6,6 +6,7 @@ import { GeoModule } from './geo/geo.module';
 import { RankingModule } from './ranking/ranking.module';
 import { ConfigModule } from '@nestjs/config';
 import { DbModule } from './db/db.module';
+import { PromptModule } from './prompt/prompt.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DbModule } from './db/db.module';
     LlmModule,
     GeoModule,
     RankingModule,
+    PromptModule,
   ],
   controllers: [AppController],
   providers: [AppService],
