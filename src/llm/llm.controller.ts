@@ -1,6 +1,6 @@
-import { Controller } from '@nestjs/common';
-import { LlmResponse, LlmService } from './llm.service';
-import { Body, Post } from '@nestjs/common';
+import { Controller, Body, Post } from '@nestjs/common';
+import { LlmService } from './llm.service';
+import { type ChatMessage, type LlmResponse } from './llm.types';
 
 @Controller('llm')
 export class LlmController {
@@ -10,7 +10,7 @@ export class LlmController {
   async handleLlmQuery(
     @Body()
     body: {
-      messages: { role: string; content: string }[];
+      messages: ChatMessage[];
       models: string[];
     },
   ): Promise<LlmResponse[]> {

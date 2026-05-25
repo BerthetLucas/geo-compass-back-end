@@ -5,14 +5,15 @@ import { firstValueFrom } from 'rxjs';
 import { type AxiosResponse } from 'axios';
 import { DB, type Database } from 'src/db/db.module';
 import { llmResponseTable } from 'src/db/schema';
+import {
+  type ChatMessage,
+  type LlmResponse,
+  type OpenRouterApiResponse,
+} from './llm.types';
+import { SYSTEM_PROMPT } from './constants/system-prompt';
+import { OPENROUTER_API_URL } from './constants/open-router-url';
 
-export const SYSTEM_PROMPT = `Tu es un assistant. Tu vas recevoir des questions concernant des marques de produits. Ton travail est de répondre à la question à l'aide d'un tableau de string, sans aucun autre texte autour sous la forme de ['Marque 1', 'Marque 2', etc].`;
-
-export interface LlmResponse {
-  model: string;
-  text: string;
-  durationMs: number;
-}
+export type { LlmResponse } from './llm.types';
 
 @Injectable()
 export class LlmService {
@@ -23,18 +24,20 @@ export class LlmService {
   ) {}
 
   async sendLlmQuery(
-    messages: { role: string; content: string }[],
+    messages: ChatMessage[],
     model: string,
   ): Promise<LlmResponse> {
     const apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
     const start = Date.now();
 
-    const systemMessage = { role: 'system', content: SYSTEM_PROMPT };
-    const messagesWithSystem = [systemMessage, ...messages];
+    const messagesWithSystem: ChatMessage[] = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...messages,
+    ];
 
-    const response = await firstValueFrom<AxiosResponse<any>>(
-      this.httpService.post(
-        'https://openrouter.ai/api/v1/chat/completions',
+    const response = await firstValueFrom<AxiosResponse<OpenRouterApiResponse>>(
+      this.httpService.post<OpenRouterApiResponse>(
+        OPENROUTER_API_URL,
         { model, messages: messagesWithSystem, max_tokens: 500 },
         {
           headers: {
@@ -47,18 +50,18 @@ export class LlmService {
 
     return {
       model,
-      text: response.data.choices[0].message.content as string,
+      text: response.data.choices[0].message.content,
       durationMs: Date.now() - start,
     };
   }
 
   async sendLlmQueries(
-    messages: { role: string; content: string }[],
+    messages: ChatMessage[],
     models: string[],
   ): Promise<LlmResponse[]> {
-    const results = models.map((model) => this.sendLlmQuery(messages, model));
-
-    const responses = await Promise.all(results);
+    const responses = await Promise.all(
+      models.map((model) => this.sendLlmQuery(messages, model)),
+    );
 
     await this.db.insert(llmResponseTable).values(
       responses.map((response) => ({
