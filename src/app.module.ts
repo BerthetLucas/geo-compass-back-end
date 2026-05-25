@@ -4,9 +4,6 @@ import { AppService } from './app.service';
 import { LlmModule } from './llm/llm.module';
 import { GeoModule } from './geo/geo.module';
 import { ConfigModule } from '@nestjs/config';
-import { LlmController } from './llm/llm.controller';
-import { LlmService } from './llm/llm.service';
-import { HttpModule } from '@nestjs/axios';
 import { DbModule } from './db/db.module';
 
 @Module({
@@ -15,9 +12,8 @@ import { DbModule } from './db/db.module';
     DbModule,
     LlmModule,
     GeoModule,
-    HttpModule,
   ],
-  controllers: [AppController, LlmController],
-  providers: [AppService, LlmService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
