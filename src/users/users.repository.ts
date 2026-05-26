@@ -16,4 +16,13 @@ export class UsersRepository {
 
     return user;
   }
+
+  async create(user: Omit<User, 'id'>): Promise<User> {
+    const [createdUser] = await this.db
+      .insert(usersTable)
+      .values(user)
+      .returning();
+
+    return createdUser;
+  }
 }
