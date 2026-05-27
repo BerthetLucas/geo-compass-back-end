@@ -7,6 +7,8 @@ import { RankingModule } from './ranking/ranking.module';
 import { ConfigModule } from '@nestjs/config';
 import { DbModule } from './db/db.module';
 import { PromptModule } from './prompt/prompt.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { PromptModule } from './prompt/prompt.module';
     GeoModule,
     RankingModule,
     PromptModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
