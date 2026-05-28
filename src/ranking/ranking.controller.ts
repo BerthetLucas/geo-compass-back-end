@@ -15,7 +15,7 @@ export class RankingController {
     @Query('date') dateParam?: string,
   ): Promise<{ success: boolean; date: string }> {
     const date = dateParam ? new Date(dateParam) : new Date();
-    await this.rankingService.computeAndStoreAllRankings(date);
+    await this.rankingService.computeAndStoreAllRankings(user.sub, date);
     return { success: true, date: date.toISOString().split('T')[0] };
   }
 

@@ -7,9 +7,13 @@ import { type LlmResponse } from './llm.types';
 export class LlmRepository {
   constructor(@Inject(DB) private readonly db: Database) {}
 
-  async insertResponses(responses: LlmResponse[]): Promise<void> {
+  async insertResponses(
+    userId: number,
+    responses: LlmResponse[],
+  ): Promise<void> {
     await this.db.insert(llmResponseTable).values(
       responses.map((response) => ({
+        userId,
         model: response.model,
         response: response.text,
       })),

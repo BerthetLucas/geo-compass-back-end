@@ -1,7 +1,10 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { PromptService } from './prompt.service';
 import { type PromptResponse, type UpdatePromptBody } from './prompt.types';
+import { JwtAuthGuard } from '../auth/jwt.guard';
+import { CurrentUser, type JwtPayload } from '../auth/current-user.decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller('prompt')
 export class PromptController {
   constructor(private readonly promptService: PromptService) {}
@@ -12,8 +15,11 @@ export class PromptController {
   }
 
   @Post()
-  async addPrompt(@Body('text') text: string): Promise<void> {
-    await this.promptService.addPrompt(text);
+  async addPrompt(
+    @CurrentUser() user: JwtPayload,
+    @Body('text') text: string,
+  ): Promise<void> {
+    await this.promptService.addPrompt(user.sub, text);
   }
 
   @Post('delete')

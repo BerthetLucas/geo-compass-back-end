@@ -10,12 +10,12 @@ export class PromptService {
     return this.promptRepository.getAllPrompts();
   }
 
-  async addPrompt(text: string): Promise<void> {
+  async addPrompt(userId: number, text: string): Promise<void> {
     if (!text || text.trim() === '') {
       throw new Error('Prompt text cannot be empty');
     }
 
-    await this.promptRepository.addPrompt(text);
+    await this.promptRepository.addPrompt(userId, text);
   }
 
   async deletePrompt(id: number): Promise<void> {

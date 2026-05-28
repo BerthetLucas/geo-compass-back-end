@@ -56,7 +56,10 @@ export class LlmService {
     };
   }
 
-  async sendLlmQueries(models: string[]): Promise<LlmResponse[]> {
+  async sendLlmQueries(
+    userId: number,
+    models: string[],
+  ): Promise<LlmResponse[]> {
     const activePrompts = await this.promptRepository.getActivePrompts();
 
     const responses = (
@@ -74,7 +77,7 @@ export class LlmService {
       )
     ).flat();
 
-    await this.llmRepository.insertResponses(responses);
+    await this.llmRepository.insertResponses(userId, responses);
 
     return responses;
   }

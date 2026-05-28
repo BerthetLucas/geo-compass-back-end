@@ -9,6 +9,7 @@ export class RankingRepository {
   constructor(@Inject(DB) private readonly db: Database) {}
 
   async insertGlobalRanking(
+    userId: number,
     date: string,
     brands: BrandRanking[],
   ): Promise<void> {
@@ -20,6 +21,7 @@ export class RankingRepository {
 
     await this.db.insert(globalRankingsTable).values(
       brands.map((b) => ({
+        userId,
         date,
         brand: b.brand,
         mentions: b.mentions,
@@ -29,6 +31,7 @@ export class RankingRepository {
   }
 
   async insertModelRanking(
+    userId: number,
     date: string,
     model: string,
     brands: BrandRanking[],
@@ -46,6 +49,7 @@ export class RankingRepository {
 
     await this.db.insert(modelRankingsTable).values(
       brands.map((b) => ({
+        userId,
         date,
         model,
         brand: b.brand,

@@ -23,8 +23,8 @@ export class PromptRepository {
     return rows.map((row) => ({ text: row.text, isActive: row.isActive }));
   }
 
-  async addPrompt(text: string): Promise<void> {
-    await this.db.insert(promptsTable).values({ text });
+  async addPrompt(userId: number, text: string): Promise<void> {
+    await this.db.insert(promptsTable).values({ userId, text });
   }
 
   async deletePrompt(id: number): Promise<void> {
