@@ -43,6 +43,20 @@
       "when": 1779816990406,
       "tag": "0005_yellow_spitfire",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779993140477,
+      "tag": "0006_youthful_namor",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779993491800,
+      "tag": "0007_regular_dorian_gray",
+      "breakpoints": true
     }
   ]
 }
