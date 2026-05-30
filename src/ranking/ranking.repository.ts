@@ -59,11 +59,19 @@ export class RankingRepository {
     );
   }
 
-  async findGlobalRanking(date: string): Promise<BrandRanking[]> {
+  async findGlobalRanking(
+    date: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
     const rows = await this.db
       .select()
       .from(globalRankingsTable)
-      .where(eq(globalRankingsTable.date, date));
+      .where(
+        and(
+          eq(globalRankingsTable.date, date),
+          eq(globalRankingsTable.userId, userId),
+        ),
+      );
 
     return rows.map((r) => ({
       rank: r.rank,
@@ -72,7 +80,11 @@ export class RankingRepository {
     }));
   }
 
-  async findModelRanking(date: string, model: string): Promise<BrandRanking[]> {
+  async findModelRanking(
+    date: string,
+    model: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
     const rows = await this.db
       .select()
       .from(modelRankingsTable)
@@ -80,6 +92,7 @@ export class RankingRepository {
         and(
           eq(modelRankingsTable.date, date),
           eq(modelRankingsTable.model, model),
+          eq(modelRankingsTable.userId, userId),
         ),
       );
 

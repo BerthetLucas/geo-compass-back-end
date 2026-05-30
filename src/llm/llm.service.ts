@@ -60,7 +60,7 @@ export class LlmService {
     userId: number,
     models: string[],
   ): Promise<LlmResponse[]> {
-    const activePrompts = await this.promptRepository.getActivePrompts();
+    const activePrompts = await this.promptRepository.getActivePrompts(userId);
 
     const responses = (
       await Promise.all(

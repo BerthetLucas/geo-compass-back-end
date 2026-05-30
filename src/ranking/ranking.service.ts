@@ -4,6 +4,7 @@ import { extractBrands } from 'src/geo/utils/extract-brands';
 import { countMentions } from 'src/geo/utils/count-mentions';
 import { buildRanking } from 'src/geo/utils/build-ranking';
 import { RankingRepository } from './ranking.repository';
+import { BrandRanking } from 'src/geo/geo.types';
 
 @Injectable()
 export class RankingService {
@@ -54,5 +55,19 @@ export class RankingService {
 
   private toDateString(date: Date): string {
     return date.toISOString().split('T')[0];
+  }
+
+  async getGlobalRanking(date: Date, userId: number): Promise<BrandRanking[]> {
+    const dateStr = this.toDateString(date);
+    return this.rankingRepository.findGlobalRanking(dateStr, userId);
+  }
+
+  async getModelRanking(
+    date: Date,
+    model: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
+    const dateStr = this.toDateString(date);
+    return this.rankingRepository.findModelRanking(dateStr, model, userId);
   }
 }
