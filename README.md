@@ -1,98 +1,134 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# GEO Compass
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API for **brand ranking** based on AI model answers (GEO — _Generative Engine Optimization_).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The idea: ask questions (prompts) to several AI models, collect the brands they mention, and derive a daily brand ranking — both globally and per model.
 
-## Description
+## Table of contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Stack](#stack)
+- [How it works](#how-it-works)
+- [Architecture](#architecture)
+- [Data model](#data-model)
+- [Endpoints](#endpoints)
+- [Getting started](#getting-started)
+- [Environment variables](#environment-variables)
 
-## Project setup
+## Stack
 
-```bash
-$ pnpm install
+| Area | Choice |
+| --- | --- |
+| Framework | [NestJS 11](https://nestjs.com) |
+| ORM | [Drizzle](https://orm.drizzle.team) |
+| Database | PostgreSQL ([Neon serverless](https://neon.tech)) |
+| LLM calls | [OpenRouter](https://openrouter.ai) (via `@nestjs/axios`) |
+| Auth | JWT (`@nestjs/jwt`) + `bcrypt` |
+| Language | TypeScript |
+
+## How it works
+
+The full flow, from question to ranking:
+
+1. **Prompts** — The user defines their questions (`prompts`). Only `isActive` prompts are queried.
+2. **Querying the models** (`POST /llm`) — For each active prompt × each requested model, we call OpenRouter. A _system prompt_ forces the answer as a JSON array of brands (`["Brand 1", "Brand 2"]`). Raw answers are stored in `llm_responses`.
+3. **Ranking computation** (`POST /ranking/compute`) — For a given date, we read that day's responses, extract the brands, count mentions, build the ranking, then store a snapshot in `global_rankings` (all models combined) and `model_rankings` (per model).
+4. **Reading** (`GET /geo/*`) — The frontend reads the already-computed snapshots.
+
+> Computation (write) and reading (serve) are intentionally separated: we never recompute on read, we serve a frozen snapshot.
+
+## Architecture
+
+Each domain = one NestJS module, with a single responsibility over its table.
+
+| Module | Role | Repository | Table(s) |
+| --- | --- | --- | --- |
+| `auth` | Login / register, JWT, `AuthGuard` | — | — |
+| `users` | Account management | `UsersRepository` | `users` |
+| `prompt` | Questions CRUD | `PromptRepository` | `prompts` |
+| `llm` | Model calls + storing raw answers | `LlmRepository` | `llm_responses` |
+| `ranking` | **Compute + write** snapshots | `RankingRepository` (write) | `global_rankings`, `model_rankings` |
+| `geo` | **Read** snapshots for the frontend | `GeoRepository` (read) | `global_rankings`, `model_rankings` |
+
+**Compute pipeline** (pure functions, in `src/ranking/utils/`):
+
+```
+extractBrands  →  countMentions  →  buildRanking
+(parse JSON)      (count/brand)      (sort + assign rank)
 ```
 
-## Compile and run the project
+Key rule: no service touches another's table. The write path (`ranking`) and the read path (`geo`) are decoupled — independent modules.
 
-```bash
-# development
-$ pnpm run start
+## Data model
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```
+users ──┬── prompts          (user's questions)
+        ├── llm_responses     (raw model answers)
+        ├── global_rankings   (daily snapshot, all models)
+        └── model_rankings    (daily snapshot, per model)
 ```
 
-## Run tests
+- `global_rankings` / `model_rankings`: `(userId, date, [model], brand, mentions, rank)`. Idempotent rewrite — a `compute` purges then re-inserts the snapshot for the given `(userId, date[, model])`.
+- Migrations managed by Drizzle Kit (`drizzle/`).
+
+## Endpoints
+
+All routes except `auth` require an `Authorization: Bearer <token>` header.
+
+### Auth
+
+| Method | Route | Body | Description |
+| --- | --- | --- | --- |
+| `POST` | `/auth/register` | `{ email, password }` | Creates an account, returns an `access_token` |
+| `POST` | `/auth/login` | `{ email, password }` | Returns an `access_token` |
+
+### Prompts
+
+| Method | Route | Body | Description |
+| --- | --- | --- | --- |
+| `GET` | `/prompt` | — | Lists the user's prompts |
+| `POST` | `/prompt` | `{ text }` | Adds a prompt |
+| `POST` | `/prompt/delete` | `{ id }` | Deletes a prompt |
+| `PUT` | `/prompt/:id` | `{ text?, isActive? }` | Updates a prompt |
+
+### LLM
+
+| Method | Route | Body | Description |
+| --- | --- | --- | --- |
+| `POST` | `/llm` | `{ models: string[] }` | Queries the models for all active prompts, stores the answers |
+
+### Ranking (compute)
+
+| Method | Route | Query | Description |
+| --- | --- | --- | --- |
+| `POST` | `/ranking/compute` | `?date=YYYY-MM-DD` | Computes and stores the snapshots (default: today) |
+
+### Geo (read)
+
+| Method | Route | Query | Description |
+| --- | --- | --- | --- |
+| `GET` | `/geo/global` | `?date=YYYY-MM-DD` | Global ranking for the day |
+| `GET` | `/geo/model/:model` | `?date=YYYY-MM-DD` | Ranking for a given model |
+
+## Getting started
 
 ```bash
-# unit tests
-$ pnpm run test
+pnpm install
 
-# e2e tests
-$ pnpm run test:e2e
+# Drizzle migrations
+pnpm drizzle-kit migrate
 
-# test coverage
-$ pnpm run test:cov
+# dev (watch)
+pnpm run start:dev
+
+# prod
+pnpm run build && pnpm run start:prod
 ```
 
-## Deployment
+## Environment variables
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+| Variable | Description |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL URL (Neon) |
+| `JWT_SECRET` | JWT signing secret |
+| `OPENROUTER_API_KEY` | OpenRouter API key |
+| `PORT` | Listening port (default: `3000`) |
