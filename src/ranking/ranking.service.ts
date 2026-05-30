@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { GeoRepository } from 'src/geo/geo.repository';
-import { extractBrands } from 'src/geo/utils/extract-brands';
-import { countMentions } from 'src/geo/utils/count-mentions';
-import { buildRanking } from 'src/geo/utils/build-ranking';
+import { LlmRepository } from 'src/llm/llm.repository';
 import { RankingRepository } from './ranking.repository';
-import { BrandRanking } from 'src/geo/geo.types';
+import { extractBrands } from './utils/extract-brands';
+import { countMentions } from './utils/count-mentions';
+import { buildRanking } from './utils/build-ranking';
 
 @Injectable()
 export class RankingService {
   constructor(
-    private readonly geoRepository: GeoRepository,
+    private readonly llmRepository: LlmRepository,
     private readonly rankingRepository: RankingRepository,
   ) {}
 
@@ -22,10 +21,11 @@ export class RankingService {
     userId: number,
     date: Date,
   ): Promise<void> {
-    const responses = await this.geoRepository.findResponsesByDate(date);
-    const brands = extractBrands(responses);
-    const counts = countMentions(brands);
-    const ranking = buildRanking(counts);
+    const responses = await this.llmRepository.findResponsesByDate(
+      date,
+      userId,
+    );
+    const ranking = buildRanking(countMentions(extractBrands(responses)));
     const dateStr = this.toDateString(date);
     await this.rankingRepository.insertGlobalRanking(userId, dateStr, ranking);
   }
@@ -34,16 +34,19 @@ export class RankingService {
     userId: number,
     date: Date,
   ): Promise<void> {
-    const responses = await this.geoRepository.findResponsesByDate(date);
+    const responses = await this.llmRepository.findResponsesByDate(
+      date,
+      userId,
+    );
     const dateStr = this.toDateString(date);
 
     const modelNames = [...new Set(responses.map((r) => r.model))];
 
     for (const model of modelNames) {
       const modelResponses = responses.filter((r) => r.model === model);
-      const brands = extractBrands(modelResponses);
-      const counts = countMentions(brands);
-      const ranking = buildRanking(counts);
+      const ranking = buildRanking(
+        countMentions(extractBrands(modelResponses)),
+      );
       await this.rankingRepository.insertModelRanking(
         userId,
         dateStr,
@@ -55,19 +58,5 @@ export class RankingService {
 
   private toDateString(date: Date): string {
     return date.toISOString().split('T')[0];
-  }
-
-  async getGlobalRanking(date: Date, userId: number): Promise<BrandRanking[]> {
-    const dateStr = this.toDateString(date);
-    return this.rankingRepository.findGlobalRanking(dateStr, userId);
-  }
-
-  async getModelRanking(
-    date: Date,
-    model: string,
-    userId: number,
-  ): Promise<BrandRanking[]> {
-    const dateStr = this.toDateString(date);
-    return this.rankingRepository.findModelRanking(dateStr, model, userId);
   }
 }

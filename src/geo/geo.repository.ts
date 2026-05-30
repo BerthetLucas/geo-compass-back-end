@@ -1,56 +1,54 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, gte, lte } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { DB, type Database } from 'src/db/db.module';
-import { llmResponseTable } from 'src/db/schema';
+import { globalRankingsTable, modelRankingsTable } from 'src/db/schema';
+import { type BrandRanking } from 'src/ranking/ranking.types';
 
 @Injectable()
 export class GeoRepository {
   constructor(@Inject(DB) private readonly db: Database) {}
 
-  async findTodayResponses() {
-    const startOfToday = this.getStartOfToday();
-
-    return this.db
+  async findGlobalRanking(
+    date: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
+    const rows = await this.db
       .select()
-      .from(llmResponseTable)
-      .where(gte(llmResponseTable.createdAt, startOfToday));
-  }
-
-  async findTodayResponsesByModel(model: string) {
-    const startOfToday = this.getStartOfToday();
-
-    return this.db
-      .select()
-      .from(llmResponseTable)
+      .from(globalRankingsTable)
       .where(
         and(
-          gte(llmResponseTable.createdAt, startOfToday),
-          eq(llmResponseTable.model, model),
+          eq(globalRankingsTable.date, date),
+          eq(globalRankingsTable.userId, userId),
         ),
       );
+
+    return rows.map((r) => ({
+      rank: r.rank,
+      brand: r.brand,
+      mentions: r.mentions,
+    }));
   }
 
-  async findResponsesByDate(date: Date) {
-    const startOfDay = new Date(date);
-    startOfDay.setUTCHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(date);
-    endOfDay.setUTCHours(23, 59, 59, 999);
-
-    return this.db
+  async findModelRanking(
+    date: string,
+    model: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
+    const rows = await this.db
       .select()
-      .from(llmResponseTable)
+      .from(modelRankingsTable)
       .where(
         and(
-          gte(llmResponseTable.createdAt, startOfDay),
-          lte(llmResponseTable.createdAt, endOfDay),
+          eq(modelRankingsTable.date, date),
+          eq(modelRankingsTable.model, model),
+          eq(modelRankingsTable.userId, userId),
         ),
       );
-  }
 
-  private getStartOfToday(): Date {
-    const date = new Date();
-    date.setUTCHours(0, 0, 0, 0);
-    return date;
+    return rows.map((r) => ({
+      rank: r.rank,
+      brand: r.brand,
+      mentions: r.mentions,
+    }));
   }
 }

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { DB, type Database } from 'src/db/db.module';
 import { globalRankingsTable, modelRankingsTable } from 'src/db/schema';
-import { type BrandRanking } from 'src/geo/geo.types';
+import { type BrandRanking } from './ranking.types';
 
 @Injectable()
 export class RankingRepository {
@@ -15,7 +15,12 @@ export class RankingRepository {
   ): Promise<void> {
     await this.db
       .delete(globalRankingsTable)
-      .where(eq(globalRankingsTable.date, date));
+      .where(
+        and(
+          eq(globalRankingsTable.date, date),
+          eq(globalRankingsTable.userId, userId),
+        ),
+      );
 
     if (brands.length === 0) return;
 
@@ -42,6 +47,7 @@ export class RankingRepository {
         and(
           eq(modelRankingsTable.date, date),
           eq(modelRankingsTable.model, model),
+          eq(modelRankingsTable.userId, userId),
         ),
       );
 
@@ -57,49 +63,5 @@ export class RankingRepository {
         rank: b.rank,
       })),
     );
-  }
-
-  async findGlobalRanking(
-    date: string,
-    userId: number,
-  ): Promise<BrandRanking[]> {
-    const rows = await this.db
-      .select()
-      .from(globalRankingsTable)
-      .where(
-        and(
-          eq(globalRankingsTable.date, date),
-          eq(globalRankingsTable.userId, userId),
-        ),
-      );
-
-    return rows.map((r) => ({
-      rank: r.rank,
-      brand: r.brand,
-      mentions: r.mentions,
-    }));
-  }
-
-  async findModelRanking(
-    date: string,
-    model: string,
-    userId: number,
-  ): Promise<BrandRanking[]> {
-    const rows = await this.db
-      .select()
-      .from(modelRankingsTable)
-      .where(
-        and(
-          eq(modelRankingsTable.date, date),
-          eq(modelRankingsTable.model, model),
-          eq(modelRankingsTable.userId, userId),
-        ),
-      );
-
-    return rows.map((r) => ({
-      rank: r.rank,
-      brand: r.brand,
-      mentions: r.mentions,
-    }));
   }
 }

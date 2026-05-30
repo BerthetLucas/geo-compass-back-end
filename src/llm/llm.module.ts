@@ -10,7 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [HttpModule, AuthModule],
   providers: [LlmService, LlmRepository, PromptRepository, AuthGuard],
-  exports: [LlmService],
+  exports: [LlmService, LlmRepository],
   controllers: [LlmController],
 })
 export class LlmModule {}

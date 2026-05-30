@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { type BrandRanking } from './geo.types';
+import { type BrandRanking } from '../ranking/ranking.types';
 import { GeoRepository } from './geo.repository';
-import { extractBrands } from './utils/extract-brands';
-import { countMentions } from './utils/count-mentions';
-import { buildRanking } from './utils/build-ranking';
 
 @Injectable()
 export class GeoService {
   constructor(private readonly geoRepository: GeoRepository) {}
 
-  async getDailyGlobalBrandRanking(): Promise<BrandRanking[]> {
-    const todayResponses = await this.geoRepository.findTodayResponses();
-    const allBrands = extractBrands(todayResponses);
-    const mentionCounts = countMentions(allBrands);
-    return buildRanking(mentionCounts);
+  async getGlobalRanking(date: Date, userId: number): Promise<BrandRanking[]> {
+    const dateStr = this.toDateString(date);
+    return this.geoRepository.findGlobalRanking(dateStr, userId);
   }
 
-  async getDailyResponseByModel(model: string): Promise<BrandRanking[]> {
-    const todayResponses =
-      await this.geoRepository.findTodayResponsesByModel(model);
-    const allBrands = extractBrands(todayResponses);
-    const mentionCounts = countMentions(allBrands);
-    return buildRanking(mentionCounts);
+  async getModelRanking(
+    date: Date,
+    model: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
+    const dateStr = this.toDateString(date);
+    return this.geoRepository.findModelRanking(dateStr, model, userId);
+  }
+
+  private toDateString(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 }

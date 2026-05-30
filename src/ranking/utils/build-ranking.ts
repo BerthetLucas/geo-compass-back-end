@@ -1,4 +1,4 @@
-import { type BrandRanking } from '../geo.types';
+import { type BrandRanking } from '../ranking.types';
 
 export function buildRanking(
   mentionCounts: Map<string, number>,
