@@ -9,6 +9,7 @@ export class RankingRepository {
   constructor(@Inject(DB) private readonly db: Database) {}
 
   async insertGlobalRanking(
+    userId: number,
     date: string,
     brands: BrandRanking[],
   ): Promise<void> {
@@ -20,6 +21,7 @@ export class RankingRepository {
 
     await this.db.insert(globalRankingsTable).values(
       brands.map((b) => ({
+        userId,
         date,
         brand: b.brand,
         mentions: b.mentions,
@@ -29,6 +31,7 @@ export class RankingRepository {
   }
 
   async insertModelRanking(
+    userId: number,
     date: string,
     model: string,
     brands: BrandRanking[],
@@ -46,6 +49,7 @@ export class RankingRepository {
 
     await this.db.insert(modelRankingsTable).values(
       brands.map((b) => ({
+        userId,
         date,
         model,
         brand: b.brand,
@@ -55,11 +59,19 @@ export class RankingRepository {
     );
   }
 
-  async findGlobalRanking(date: string): Promise<BrandRanking[]> {
+  async findGlobalRanking(
+    date: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
     const rows = await this.db
       .select()
       .from(globalRankingsTable)
-      .where(eq(globalRankingsTable.date, date));
+      .where(
+        and(
+          eq(globalRankingsTable.date, date),
+          eq(globalRankingsTable.userId, userId),
+        ),
+      );
 
     return rows.map((r) => ({
       rank: r.rank,
@@ -68,7 +80,11 @@ export class RankingRepository {
     }));
   }
 
-  async findModelRanking(date: string, model: string): Promise<BrandRanking[]> {
+  async findModelRanking(
+    date: string,
+    model: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
     const rows = await this.db
       .select()
       .from(modelRankingsTable)
@@ -76,6 +92,7 @@ export class RankingRepository {
         and(
           eq(modelRankingsTable.date, date),
           eq(modelRankingsTable.model, model),
+          eq(modelRankingsTable.userId, userId),
         ),
       );
 

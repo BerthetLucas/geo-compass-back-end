@@ -4,6 +4,7 @@ import { extractBrands } from 'src/geo/utils/extract-brands';
 import { countMentions } from 'src/geo/utils/count-mentions';
 import { buildRanking } from 'src/geo/utils/build-ranking';
 import { RankingRepository } from './ranking.repository';
+import { BrandRanking } from 'src/geo/geo.types';
 
 @Injectable()
 export class RankingService {
@@ -12,21 +13,27 @@ export class RankingService {
     private readonly rankingRepository: RankingRepository,
   ) {}
 
-  async computeAndStoreAllRankings(date: Date): Promise<void> {
-    await this.computeAndStoreGlobalRanking(date);
-    await this.computeAndStoreModelRankings(date);
+  async computeAndStoreAllRankings(userId: number, date: Date): Promise<void> {
+    await this.computeAndStoreGlobalRanking(userId, date);
+    await this.computeAndStoreModelRankings(userId, date);
   }
 
-  async computeAndStoreGlobalRanking(date: Date): Promise<void> {
+  async computeAndStoreGlobalRanking(
+    userId: number,
+    date: Date,
+  ): Promise<void> {
     const responses = await this.geoRepository.findResponsesByDate(date);
     const brands = extractBrands(responses);
     const counts = countMentions(brands);
     const ranking = buildRanking(counts);
     const dateStr = this.toDateString(date);
-    await this.rankingRepository.insertGlobalRanking(dateStr, ranking);
+    await this.rankingRepository.insertGlobalRanking(userId, dateStr, ranking);
   }
 
-  async computeAndStoreModelRankings(date: Date): Promise<void> {
+  async computeAndStoreModelRankings(
+    userId: number,
+    date: Date,
+  ): Promise<void> {
     const responses = await this.geoRepository.findResponsesByDate(date);
     const dateStr = this.toDateString(date);
 
@@ -37,11 +44,30 @@ export class RankingService {
       const brands = extractBrands(modelResponses);
       const counts = countMentions(brands);
       const ranking = buildRanking(counts);
-      await this.rankingRepository.insertModelRanking(dateStr, model, ranking);
+      await this.rankingRepository.insertModelRanking(
+        userId,
+        dateStr,
+        model,
+        ranking,
+      );
     }
   }
 
   private toDateString(date: Date): string {
     return date.toISOString().split('T')[0];
+  }
+
+  async getGlobalRanking(date: Date, userId: number): Promise<BrandRanking[]> {
+    const dateStr = this.toDateString(date);
+    return this.rankingRepository.findGlobalRanking(dateStr, userId);
+  }
+
+  async getModelRanking(
+    date: Date,
+    model: string,
+    userId: number,
+  ): Promise<BrandRanking[]> {
+    const dateStr = this.toDateString(date);
+    return this.rankingRepository.findModelRanking(dateStr, model, userId);
   }
 }

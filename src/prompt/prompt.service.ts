@@ -6,29 +6,30 @@ import { type PromptResponse } from './prompt.types';
 export class PromptService {
   constructor(private readonly promptRepository: PromptRepository) {}
 
-  async getAllPrompts(): Promise<PromptResponse[]> {
-    return this.promptRepository.getAllPrompts();
+  async getAllPrompts(userId: number): Promise<PromptResponse[]> {
+    return this.promptRepository.getAllPrompts(userId);
   }
 
-  async addPrompt(text: string): Promise<void> {
+  async addPrompt(userId: number, text: string): Promise<void> {
     if (!text || text.trim() === '') {
       throw new Error('Prompt text cannot be empty');
     }
 
-    await this.promptRepository.addPrompt(text);
+    await this.promptRepository.addPrompt(userId, text);
   }
 
-  async deletePrompt(id: number): Promise<void> {
-    await this.promptRepository.deletePrompt(id);
+  async deletePrompt(id: number, userId: number): Promise<void> {
+    await this.promptRepository.deletePrompt(id, userId);
   }
 
   async updatePrompt(
     id: number,
     updates: { text?: string; isActive?: boolean },
+    userId: number,
   ): Promise<void> {
     if (updates.text !== undefined && updates.text.trim() === '') {
       throw new Error('Prompt text cannot be empty');
     }
-    await this.promptRepository.updatePrompt(id, updates);
+    await this.promptRepository.updatePrompt(id, updates, userId);
   }
 }
