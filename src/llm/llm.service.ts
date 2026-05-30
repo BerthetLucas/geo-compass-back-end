@@ -62,6 +62,10 @@ export class LlmService {
   ): Promise<LlmResponse[]> {
     const activePrompts = await this.promptRepository.getActivePrompts(userId);
 
+    if (!activePrompts.length) {
+      throw new Error('No active prompts found for user');
+    }
+
     const responses = (
       await Promise.all(
         activePrompts.map((prompt) =>
