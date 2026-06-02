@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, between, eq } from 'drizzle-orm';
 import { DB, type Database } from 'src/db/db.module';
 import { globalRankingsTable, modelRankingsTable } from 'src/db/schema';
-import { type BrandRanking } from 'src/ranking/ranking.types';
+import {
+  type BrandRanking,
+  type DailyRanking,
+} from 'src/ranking/ranking.types';
 
 @Injectable()
 export class GeoRepository {
@@ -49,6 +52,41 @@ export class GeoRepository {
       rank: r.rank,
       brand: r.brand,
       mentions: r.mentions,
+    }));
+  }
+
+  async findRankingByPeriod(
+    startDate: string,
+    endDate: string,
+    userId: number,
+  ): Promise<DailyRanking[]> {
+    const rows = await this.db
+      .select()
+      .from(globalRankingsTable)
+      .where(
+        and(
+          eq(globalRankingsTable.userId, userId),
+          between(globalRankingsTable.date, startDate, endDate),
+        ),
+      )
+      .orderBy(asc(globalRankingsTable.date));
+
+    const rankingsByDate: Record<string, BrandRanking[]> = {};
+
+    for (const row of rows) {
+      if (!rankingsByDate[row.date]) {
+        rankingsByDate[row.date] = [];
+      }
+      rankingsByDate[row.date].push({
+        rank: row.rank,
+        brand: row.brand,
+        mentions: row.mentions,
+      });
+    }
+
+    return Object.entries(rankingsByDate).map(([date, rankings]) => ({
+      date,
+      rankings,
     }));
   }
 }

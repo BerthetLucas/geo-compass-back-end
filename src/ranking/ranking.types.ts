@@ -3,3 +3,8 @@ export interface BrandRanking {
   brand: string;
   mentions: number;
 }
+
+export interface DailyRanking {
+  date: string;
+  rankings: BrandRanking[];
+}

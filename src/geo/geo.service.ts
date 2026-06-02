@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type BrandRanking } from '../ranking/ranking.types';
+import { type BrandRanking, type DailyRanking } from '../ranking/ranking.types';
 import { GeoRepository } from './geo.repository';
 
 @Injectable()
@@ -22,5 +22,19 @@ export class GeoService {
 
   private toDateString(date: Date): string {
     return date.toISOString().split('T')[0];
+  }
+
+  async getRankingByPeriod(
+    startDate: Date,
+    endDate: Date,
+    userId: number,
+  ): Promise<DailyRanking[]> {
+    const startDateStr = this.toDateString(startDate);
+    const endDateStr = this.toDateString(endDate);
+    return this.geoRepository.findRankingByPeriod(
+      startDateStr,
+      endDateStr,
+      userId,
+    );
   }
 }
