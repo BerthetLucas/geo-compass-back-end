@@ -19,7 +19,7 @@ importers:
         version: 4.0.1(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.16.1)(rxjs@7.8.2)
       '@nestjs/bullmq':
         specifier: ^11.0.4
-        version: 11.0.4(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.23)(bullmq@5.77.6)
+        version: 11.0.4(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.23)(bullmq@5.78.0)
       '@nestjs/common':
         specifier: ^11.1.24
         version: 11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -45,8 +45,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       bullmq:
-        specifier: ^5.77.6
-        version: 5.77.6
+        specifier: ^5.78.0
+        version: 5.78.0
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -1904,8 +1904,8 @@ packages:
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
-  bullmq@5.77.6:
-    resolution: {integrity: sha512-WCpSoCD4vWyRD+btOsFrO7iBGInrTgG155gTZCV8qY0Yex2KtsbVtFERx6V1WZ2xWl/5ZxnLar8Z8ufnS4f5jg==}
+  bullmq@5.78.0:
+    resolution: {integrity: sha512-tT9jJmbobk9ueEfFc22egLmgwCcMGgOjZ5Y1cvgczBPv1JUmC7iHQVbQtqku2YBE5dE9uzdVpxIrBvL/YAjGwA==}
     engines: {node: '>=12.22.0'}
     peerDependencies:
       redis: '>=5.0.0'
@@ -3153,8 +3153,8 @@ packages:
     resolution: {integrity: sha512-4kmO/MdyUIkLIvTPr8VHLil4AtoKIoniWPIEk5+CDy0xnWC84azhSFmuJ7PxZdsYtiP5kEeQsORAVIeMgxT+Hw==}
     hasBin: true
 
-  msgpackr@2.0.1:
-    resolution: {integrity: sha512-9J+tqTEsbHqY8YohazYgty7LgerFIWxvMLpUjqETSmjHojtJm2WnX2kK/2a1fLI7CO7ERP1YSEUXMucz4j+yBA==}
+  msgpackr@2.0.2:
+    resolution: {integrity: sha512-c5hYOXFbP79Slh6Dzd2wzk+jnV7mX1UxfMYtilnY1NmalXPqG8DGb5cYCMBrW4AsH3zekBBZd4QrKz9NhtvYLQ==}
 
   multer@2.1.1:
     resolution: {integrity: sha512-mo+QTzKlx8R7E5ylSXxWzGoXoZbOsRMpyitcht8By2KHvMbf3tjwosZ/Mu/XYU6UuJ3VZnODIrak5ZrPiPyB6A==}
@@ -3455,6 +3455,11 @@ packages:
 
   semver@7.8.1:
     resolution: {integrity: sha512-rkVq3IXh+4FDGch+KwzX3aV9W3kO54GyEgpvBzSyctDA6Xtd7RJQV1xmXbeQp5v7+VzLOfVqiutSE6GICgPFvg==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.8.4:
+    resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -4926,12 +4931,12 @@ snapshots:
       '@nestjs/core': 11.1.23(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.23)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       tslib: 2.8.1
 
-  '@nestjs/bullmq@11.0.4(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.23)(bullmq@5.77.6)':
+  '@nestjs/bullmq@11.0.4(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.23)(bullmq@5.78.0)':
     dependencies:
       '@nestjs/bull-shared': 11.0.4(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.23)
       '@nestjs/common': 11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.23(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.23)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      bullmq: 5.77.6
+      bullmq: 5.78.0
       tslib: 2.8.1
 
   '@nestjs/cli@11.0.21(@types/node@25.9.1)(prettier@3.8.3)':
@@ -5295,7 +5300,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.60.1
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.1
+      semver: 7.8.4
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -5721,11 +5726,11 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
-  bullmq@5.77.6:
+  bullmq@5.78.0:
     dependencies:
       cron-parser: 4.9.0
       ioredis: 5.10.1
-      msgpackr: 2.0.1
+      msgpackr: 2.0.2
       node-abort-controller: 3.1.1
       semver: 7.8.0
       tslib: 2.8.1
@@ -6319,7 +6324,7 @@ snapshots:
       minimatch: 3.1.5
       node-abort-controller: 3.1.1
       schema-utils: 3.3.0
-      semver: 7.8.1
+      semver: 7.8.4
       tapable: 2.3.3
       typescript: 5.9.3
       webpack: 5.106.0
@@ -6554,7 +6559,7 @@ snapshots:
       '@babel/parser': 7.29.7
       '@istanbuljs/schema': 0.1.6
       istanbul-lib-coverage: 3.2.2
-      semver: 7.8.1
+      semver: 7.8.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6842,7 +6847,7 @@ snapshots:
       jest-message-util: 30.4.1
       jest-util: 30.4.1
       pretty-format: 30.4.1
-      semver: 7.8.1
+      semver: 7.8.4
       synckit: 0.11.12
     transitivePeerDependencies:
       - supports-color
@@ -6949,7 +6954,7 @@ snapshots:
       lodash.isstring: 4.0.1
       lodash.once: 4.1.1
       ms: 2.1.3
-      semver: 7.8.1
+      semver: 7.8.4
 
   jwa@2.0.1:
     dependencies:
@@ -7032,7 +7037,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.8.1
+      semver: 7.8.4
 
   make-error@1.3.6: {}
 
@@ -7107,7 +7112,7 @@ snapshots:
       '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.4
     optional: true
 
-  msgpackr@2.0.1:
+  msgpackr@2.0.2:
     optionalDependencies:
       msgpackr-extract: 3.0.4
 
@@ -7375,6 +7380,8 @@ snapshots:
   semver@7.8.0: {}
 
   semver@7.8.1: {}
+
+  semver@7.8.4: {}
 
   send@1.2.1:
     dependencies:
