@@ -25,6 +25,15 @@ export class GeoController {
     return this.geoService.getGlobalRanking(new Date(date), request.user.sub);
   }
 
+  @Get('models')
+  async getAvailableModels(
+    @Request() request: { user: JwtPayload },
+    @Query('date') dateParam?: string,
+  ): Promise<string[]> {
+    const date = dateParam ?? new Date().toISOString().split('T')[0];
+    return this.geoService.getAvailableModels(new Date(date), request.user.sub);
+  }
+
   @Get('model/:model')
   async getModelRanking(
     @Request() request: { user: JwtPayload },

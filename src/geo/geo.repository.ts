@@ -32,6 +32,20 @@ export class GeoRepository {
     }));
   }
 
+  async findAvailableModels(date: string, userId: number): Promise<string[]> {
+    const rows = await this.db
+      .selectDistinct({ model: modelRankingsTable.model })
+      .from(modelRankingsTable)
+      .where(
+        and(
+          eq(modelRankingsTable.date, date),
+          eq(modelRankingsTable.userId, userId),
+        ),
+      );
+
+    return rows.map((r) => r.model);
+  }
+
   async findModelRanking(
     date: string,
     model: string,

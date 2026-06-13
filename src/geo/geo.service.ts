@@ -11,6 +11,11 @@ export class GeoService {
     return this.geoRepository.findGlobalRanking(dateStr, userId);
   }
 
+  async getAvailableModels(date: Date, userId: number): Promise<string[]> {
+    const dateStr = this.toDateString(date);
+    return this.geoRepository.findAvailableModels(dateStr, userId);
+  }
+
   async getModelRanking(
     date: Date,
     model: string,

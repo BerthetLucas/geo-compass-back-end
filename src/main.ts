@@ -8,9 +8,6 @@ async function bootstrap() {
     origin: ['http://localhost:3000'],
   });
   app.useGlobalPipes(new ValidationPipe());
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 8000);
 }
 void bootstrap();
-
-// Only for test purposes, to be removed in production
-//PLease deploy
