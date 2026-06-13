@@ -8,6 +8,11 @@ import { eq } from 'drizzle-orm';
 export class UsersRepository {
   constructor(@Inject(DB) private readonly db: Database) {}
 
+  async findAll(): Promise<User[]> {
+    const users = await this.db.select().from(usersTable);
+    return users;
+  }
+
   async findOneByEmail(email: string): Promise<User | undefined> {
     const [user] = await this.db
       .select()

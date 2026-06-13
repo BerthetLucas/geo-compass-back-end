@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [LlmModule, AuthModule],
   providers: [RankingService, RankingRepository, AuthGuard],
+  exports: [RankingRepository, RankingService],
   controllers: [RankingController],
 })
 export class RankingModule {}

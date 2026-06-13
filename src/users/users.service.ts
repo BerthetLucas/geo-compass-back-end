@@ -7,6 +7,10 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
+  async findAll(): Promise<User[]> {
+    return await this.usersRepository.findAll();
+  }
+
   async findOneByEmail(email: string): Promise<User | undefined> {
     return await this.usersRepository.findOneByEmail(email);
   }
