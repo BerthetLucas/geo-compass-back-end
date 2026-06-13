@@ -14,7 +14,11 @@ export class PromptRepository {
       .from(promptsTable)
       .where(eq(promptsTable.userId, userId));
 
-    return rows.map((row) => ({ text: row.text, isActive: row.isActive }));
+    return rows.map((row) => ({
+      id: row.id,
+      text: row.text,
+      isActive: row.isActive,
+    }));
   }
 
   async getActivePrompts(userId: number): Promise<PromptResponse[]> {
@@ -25,7 +29,11 @@ export class PromptRepository {
         and(eq(promptsTable.userId, userId), eq(promptsTable.isActive, true)),
       );
 
-    return rows.map((row) => ({ text: row.text, isActive: row.isActive }));
+    return rows.map((row) => ({
+      id: row.id,
+      text: row.text,
+      isActive: row.isActive,
+    }));
   }
 
   async addPrompt(userId: number, text: string): Promise<void> {
