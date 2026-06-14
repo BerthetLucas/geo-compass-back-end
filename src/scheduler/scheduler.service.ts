@@ -16,8 +16,9 @@ export class SchedulerService {
     private readonly rankingService: RankingService,
   ) {}
 
-  @Cron('20 14 * * *', { timeZone: 'Europe/Paris' })
+  @Cron('30 14 * * *', { timeZone: 'Europe/Paris' })
   async runDailyDataComputation() {
+    this.logger.log('Cron started');
     const start = Date.now();
     const users = await this.usersService.findAll();
     const today = new Date();
