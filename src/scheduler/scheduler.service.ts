@@ -16,7 +16,7 @@ export class SchedulerService {
     private readonly rankingService: RankingService,
   ) {}
 
-  @Cron('5 15 * * *', { timeZone: 'Europe/Paris' })
+  @Cron('0 2 * * *', { timeZone: 'Europe/Paris' })
   async runDailyDataComputation() {
     this.logger.log('Cron started');
     const start = Date.now();
