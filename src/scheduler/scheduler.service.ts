@@ -16,7 +16,7 @@ export class SchedulerService {
     private readonly rankingService: RankingService,
   ) {}
 
-  @Cron('0 14 * * *', { timeZone: 'Europe/Paris' })
+  @Cron('10 14 * * *', { timeZone: 'Europe/Paris' })
   async runDailyDataComputation() {
     const start = Date.now();
     const users = await this.usersService.findAll();
@@ -66,10 +66,7 @@ export class SchedulerService {
     if (!webhookUrl) return;
 
     try {
-      await axios.post(webhookUrl, {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ embeds: [embed] }),
-      });
+      await axios.post(webhookUrl, { embeds: [embed] });
     } catch (error) {
       this.logger.error('Discord webhook failed', error);
     }
