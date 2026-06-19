@@ -31,7 +31,7 @@ export class UsersController {
 
     return new UserSettingsResponseDto(
       user.emailNotifications,
-      user.openRouterApiKey,
+      !!user.openRouterApiKey,
       user.email,
     );
   }
@@ -47,7 +47,7 @@ export class UsersController {
 
     return new UserSettingsResponseDto(
       user.emailNotifications,
-      user.openRouterApiKey,
+      !!user.openRouterApiKey,
       user.email,
     );
   }

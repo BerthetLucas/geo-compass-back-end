@@ -16,7 +16,13 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string): Promise<User | undefined> {
-    return await this.usersRepository.findOneByEmail(email);
+    const user = await this.usersRepository.findOneByEmail(email);
+    if (user?.openRouterApiKey) {
+      user.openRouterApiKey = this.encryptionService.decrypt(
+        user.openRouterApiKey,
+      );
+    }
+    return user;
   }
 
   async findOneById(id: number): Promise<User | undefined> {
@@ -33,13 +39,13 @@ export class UsersService {
     id: number,
     data: Partial<Pick<User, 'emailNotifications' | 'openRouterApiKey'>>,
   ): Promise<User> {
-    const encrypted = { ...data };
-    if (encrypted.openRouterApiKey) {
-      encrypted.openRouterApiKey = this.encryptionService.encrypt(
-        encrypted.openRouterApiKey,
+    const payload = { ...data };
+    if (payload.openRouterApiKey) {
+      payload.openRouterApiKey = this.encryptionService.encrypt(
+        payload.openRouterApiKey,
       );
     }
-    const user = await this.usersRepository.updateSettings(id, encrypted);
+    const user = await this.usersRepository.updateSettings(id, payload);
     if (user.openRouterApiKey) {
       user.openRouterApiKey = this.encryptionService.decrypt(
         user.openRouterApiKey,

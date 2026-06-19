@@ -13,16 +13,16 @@ export class UpdateUserSettingsDto {
 
 export class UserSettingsResponseDto {
   emailNotifications: boolean;
-  openRouterApiKey: string | null;
+  hasOpenRouterApiKey: boolean;
   email: string;
 
   constructor(
     emailNotifications: boolean,
-    openRouterApiKey: string | null,
+    hasOpenRouterApiKey: boolean,
     email: string,
   ) {
     this.emailNotifications = emailNotifications;
-    this.openRouterApiKey = openRouterApiKey;
+    this.hasOpenRouterApiKey = hasOpenRouterApiKey;
     this.email = email;
   }
 }
