@@ -33,7 +33,12 @@ export class AuthService {
   ): Promise<{ access_token: string }> {
     // Check mail regex and password regex
 
-    const user = await this.usersService.create({ email, password });
+    const user = await this.usersService.create({
+      email,
+      password,
+      emailNotifications: true,
+      openRouterApiKey: null,
+    });
 
     const payload = { sub: user.id, email: user.email };
     return {

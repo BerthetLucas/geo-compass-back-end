@@ -12,6 +12,7 @@ import { SYSTEM_PROMPT } from './constants/system-prompt';
 import { OPENROUTER_API_URL } from './constants/open-router-url';
 import { LlmRepository } from './llm.repository';
 import { PromptRepository } from 'src/prompt/prompt.repository';
+import { UsersService } from 'src/users/users.service';
 
 export type { LlmResponse } from './llm.types';
 
@@ -22,13 +23,16 @@ export class LlmService {
     private readonly httpService: HttpService,
     private readonly llmRepository: LlmRepository,
     private readonly promptRepository: PromptRepository,
+    private readonly usersService: UsersService,
   ) {}
 
   async sendLlmQuery(
     messages: ChatMessage[],
     model: string,
+    userApiKey?: string,
   ): Promise<LlmResponse> {
-    const apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
+    const apiKey =
+      userApiKey ?? this.configService.get<string>('OPENROUTER_API_KEY');
     const start = Date.now();
 
     const messagesWithSystem: ChatMessage[] = [
@@ -60,11 +64,16 @@ export class LlmService {
     userId: number,
     models: string[],
   ): Promise<LlmResponse[]> {
-    const activePrompts = await this.promptRepository.getActivePrompts(userId);
+    const [activePrompts, user] = await Promise.all([
+      this.promptRepository.getActivePrompts(userId),
+      this.usersService.findOneById(userId),
+    ]);
 
     if (!activePrompts.length) {
       throw new Error('No active prompts found for user');
     }
+
+    const userApiKey = user?.openRouterApiKey ?? undefined;
 
     const responses = (
       await Promise.all(
@@ -74,6 +83,7 @@ export class LlmService {
               this.sendLlmQuery(
                 [{ role: 'user', content: prompt.text }],
                 model,
+                userApiKey,
               ),
             ),
           ),

@@ -22,6 +22,28 @@ export class UsersRepository {
     return user;
   }
 
+  async findOneById(id: number): Promise<User | undefined> {
+    const [user] = await this.db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id));
+
+    return user;
+  }
+
+  async updateSettings(
+    id: number,
+    data: Partial<Pick<User, 'emailNotifications' | 'openRouterApiKey'>>,
+  ): Promise<User> {
+    const [updated] = await this.db
+      .update(usersTable)
+      .set(data)
+      .where(eq(usersTable.id, id))
+      .returning();
+
+    return updated;
+  }
+
   async create(user: Omit<User, 'id'>): Promise<User> {
     const [createdUser] = await this.db
       .insert(usersTable)
