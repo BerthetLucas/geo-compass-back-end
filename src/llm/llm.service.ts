@@ -33,6 +33,7 @@ export class LlmService {
   ): Promise<LlmResponse> {
     const apiKey =
       userApiKey ?? this.configService.get<string>('OPENROUTER_API_KEY');
+    if (!apiKey) throw new Error('No OpenRouter API key configured');
     const start = Date.now();
 
     const messagesWithSystem: ChatMessage[] = [
@@ -70,7 +71,7 @@ export class LlmService {
     ]);
 
     if (!activePrompts.length) {
-      throw new Error('No active prompts found for user');
+      return [];
     }
 
     const userApiKey = user?.openRouterApiKey ?? undefined;
