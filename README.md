@@ -1,8 +1,10 @@
-# GEO Compass
+# GEO Compass — Back-end
 
 API for **brand ranking** based on AI model answers (GEO — _Generative Engine Optimization_).
 
 The idea: ask questions (prompts) to several AI models, collect the brands they mention, and derive a daily brand ranking — both globally and per model.
+
+> This is the back-end repository. The front-end is at [github.com/BerthetLucas/geo-compass-front-end](https://github.com/BerthetLucas/geo-compass-front-end).
 
 ## Table of contents
 
