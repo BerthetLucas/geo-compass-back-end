@@ -128,9 +128,28 @@ pnpm run build && pnpm run start:prod
 
 ## Environment variables
 
-| Variable | Description |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL URL (Neon) |
-| `JWT_SECRET` | JWT signing secret |
-| `OPENROUTER_API_KEY` | OpenRouter API key |
-| `PORT` | Listening port (default: `3000`) |
+Create a `.env` file at the root of the project:
+
+```env
+DATABASE_URL=postgresql://user:password@host/dbname
+JWT_SECRET=your_jwt_secret
+ENCRYPTION_KEY=a_32_byte_hex_key
+OPENROUTER_API_KEY=sk-or-...
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+PORT=8000
+```
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `DATABASE_URL` | Yes | PostgreSQL connection string (e.g. Neon) |
+| `JWT_SECRET` | Yes | Secret used to sign JWT tokens |
+| `ENCRYPTION_KEY` | Yes | 32-byte hex key for encrypting user API keys |
+| `OPENROUTER_API_KEY` | Yes | Default OpenRouter key (used when no user key is set) |
+| `DISCORD_WEBHOOK_URL` | No | Discord webhook for daily run notifications |
+| `PORT` | No | Listening port, defaults to `8000` |
+
+## Running the full stack locally
+
+1. Start this API on port `8000` (`pnpm start:dev`)
+2. Set `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/` in the front-end `.env`
+3. Start the front-end — see [geo-compass-front-end](https://github.com/BerthetLucas/geo-compass-front-end)
