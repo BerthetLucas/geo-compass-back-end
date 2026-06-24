@@ -65,4 +65,8 @@ export class UsersService {
 
     return await this.usersRepository.create(userWithHashedPassword);
   }
+
+  async deleteAccount(id: number): Promise<void> {
+    await this.usersRepository.deleteById(id);
+  }
 }

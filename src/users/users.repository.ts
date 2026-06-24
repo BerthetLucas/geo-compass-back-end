@@ -52,4 +52,8 @@ export class UsersRepository {
 
     return createdUser;
   }
+
+  async deleteById(id: number): Promise<void> {
+    await this.db.delete(usersTable).where(eq(usersTable.id, id));
+  }
 }

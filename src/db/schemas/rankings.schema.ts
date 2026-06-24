@@ -8,7 +8,7 @@ export const globalRankingsTable = pgTable(
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer()
       .notNull()
-      .references(() => usersTable.id),
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
     date: date().notNull(),
     brand: varchar({ length: 255 }).notNull(),
     mentions: integer().notNull(),
@@ -33,7 +33,7 @@ export const modelRankingsTable = pgTable(
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer()
       .notNull()
-      .references(() => usersTable.id),
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
     date: date().notNull(),
     model: varchar({ length: 255 }).notNull(),
     brand: varchar({ length: 255 }).notNull(),

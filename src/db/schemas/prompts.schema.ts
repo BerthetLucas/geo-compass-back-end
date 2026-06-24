@@ -12,7 +12,7 @@ export const promptsTable = pgTable('prompts', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   userId: integer()
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => usersTable.id, { onDelete: 'cascade' }),
   text: text().notNull(),
   isActive: boolean().notNull().default(true),
   createdAt: timestamp().defaultNow().notNull(),
