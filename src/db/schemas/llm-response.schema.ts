@@ -12,7 +12,7 @@ export const llmResponseTable = pgTable('llm_responses', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   userId: integer()
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => usersTable.id, { onDelete: 'cascade' }),
   model: varchar({ length: 255 }).notNull(),
   response: text().notNull(),
   createdAt: timestamp().defaultNow().notNull(),

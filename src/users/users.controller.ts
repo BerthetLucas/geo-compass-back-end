@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -50,5 +51,12 @@ export class UsersController {
       !!user.openRouterApiKey,
       user.email,
     );
+  }
+
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('me')
+  async deleteMyAccount(@Request() req: { user: JwtPayload }): Promise<void> {
+    await this.usersService.deleteAccount(req.user.sub);
   }
 }
