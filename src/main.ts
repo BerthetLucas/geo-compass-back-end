@@ -8,6 +8,10 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'https://geo-compass-front-end.vercel.app',
+      'https://geo-compass-front-end.vercel.app/en/login',
+      'https://geo-compass-front-end.vercel.app/fr/login',
+      'https://geo-compass-front-end.vercel.app/en/register',
+      'https://geo-compass-front-end.vercel.app/fr/register',
     ],
   });
   app.useGlobalPipes(new ValidationPipe());
