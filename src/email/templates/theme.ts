@@ -2,15 +2,26 @@ import type { TailwindConfig } from 'react-email';
 import plugin from 'tailwindcss/plugin';
 
 const colors = {
-  bg: '#FFFFFF',
-  'bg-2': '#F3F4F6',
-  fg: '#14171E',
-  'fg-2': '#43454B',
-  'fg-3': '#7B7D81',
+  // Light theme (default)
+  bg: '#F7FAF9',
+  'bg-2': '#FCFCFC',
+  fg: '#1A1A1A',
+  'fg-2': '#787878',
+  'fg-3': '#9CA3A0',
   'fg-inverted': '#FFFFFF',
-  stroke: '#F0F0F0',
-  'stroke-strong': '#E4E4E7',
-  brand: '#614500',
+  stroke: '#E1E6E3',
+  'stroke-strong': '#CFD6D2',
+  brand: '#16A34A',
+  // Dark theme (applied via the `dark:` variant, driven by prefers-color-scheme)
+  'bg-dark': '#141417',
+  'bg-2-dark': '#0A0A0C',
+  'fg-dark': '#FAFAFA',
+  'fg-2-dark': '#A1A1AA',
+  'fg-3-dark': '#71717A',
+  'fg-inverted-dark': '#082013',
+  'stroke-dark': '#1F1F23',
+  'stroke-strong-dark': '#2A2A30',
+  'brand-dark': '#22C55E',
 } as const;
 
 const fontScale = {
@@ -60,6 +71,7 @@ const fontScale = {
 } as const;
 
 export const barebonesBoxedTailwindConfig: TailwindConfig = {
+  darkMode: 'media',
   plugins: [
     plugin((api) => {
       api.addVariant('mobile', '@media (max-width: 600px)');
