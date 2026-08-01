@@ -55,9 +55,12 @@ export class SchedulerService {
     }
 
     const duration = ((Date.now() - start) / 1000).toFixed(1);
+
+    const hasErrors = rankingErrors.length || emailErrors.length;
+
     await this.notifyDiscord({
-      color: rankingErrors.length ? 0xed4245 : 0x57f287,
-      title: rankingErrors.length
+      color: hasErrors ? 0xed4245 : 0x57f287,
+      title: hasErrors
         ? '⚠️ Cron daily — erreurs partielles'
         : '✅ Cron daily — succès',
       fields: [
@@ -77,7 +80,7 @@ export class SchedulerService {
         ...(rankingErrors.length
           ? [
               {
-                name: 'Détails',
+                name: 'Détails ranking',
                 value: rankingErrors.join('\n').slice(0, 1000),
                 inline: false,
               },
@@ -86,7 +89,7 @@ export class SchedulerService {
         ...(emailErrors.length
           ? [
               {
-                name: 'Détails',
+                name: 'Détails email',
                 value: emailErrors.join('\n').slice(0, 1000),
                 inline: false,
               },
