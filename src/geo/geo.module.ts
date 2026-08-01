@@ -9,5 +9,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [AuthModule],
   providers: [GeoService, GeoRepository, AuthGuard],
   controllers: [GeoController],
+  exports: [GeoService],
 })
 export class GeoModule {}

@@ -5,6 +5,8 @@ import { AVAILABLE_MODELS } from 'src/llm/constants/models';
 import { LlmService } from 'src/llm/llm.service';
 import { RankingService } from 'src/ranking/ranking.service';
 import { UsersService } from 'src/users/users.service';
+import { GeoService } from 'src/geo/geo.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class SchedulerService {
@@ -14,6 +16,8 @@ export class SchedulerService {
     private readonly usersService: UsersService,
     private readonly llmService: LlmService,
     private readonly rankingService: RankingService,
+    private readonly geoService: GeoService,
+    private readonly emailService: EmailService,
   ) {}
 
   @Cron('0 2 * * *', { timeZone: 'Europe/Paris' })
@@ -22,7 +26,8 @@ export class SchedulerService {
     const start = Date.now();
     const users = await this.usersService.findAll();
     const today = new Date();
-    const errors: string[] = [];
+    const rankingErrors: string[] = [];
+    const emailErrors: string[] = [];
 
     for (const user of users) {
       try {
@@ -30,28 +35,62 @@ export class SchedulerService {
         await this.rankingService.computeAndStoreAllRankings(user.id, today);
       } catch (error) {
         this.logger.error(`Cron failed for user ${user.id}`, error);
-        errors.push(
+        rankingErrors.push(
+          `${user.id}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
+    for (const user of users) {
+      if (!user.emailNotifications) continue;
+      try {
+        const ranking = await this.geoService.getGlobalRanking(today, user.id);
+        await this.emailService.sendDailyEmail(user, ranking, today);
+      } catch (error) {
+        this.logger.error(`Email failed for user ${user.id}`, error);
+        emailErrors.push(
           `${user.id}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }
 
     const duration = ((Date.now() - start) / 1000).toFixed(1);
+
+    const hasErrors = rankingErrors.length || emailErrors.length;
+
     await this.notifyDiscord({
-      color: errors.length ? 0xed4245 : 0x57f287,
-      title: errors.length
+      color: hasErrors ? 0xed4245 : 0x57f287,
+      title: hasErrors
         ? '⚠️ Cron daily — erreurs partielles'
         : '✅ Cron daily — succès',
       fields: [
         { name: 'Utilisateurs', value: String(users.length), inline: true },
-        { name: 'Échecs', value: String(errors.length), inline: true },
+        {
+          name: 'Échecs classement',
+          value: String(rankingErrors.length),
+          inline: true,
+        },
+        {
+          name: 'Échecs email',
+          value: String(emailErrors.length),
+          inline: true,
+        },
         { name: 'Durée', value: `${duration}s`, inline: true },
         { name: 'Date', value: today.toISOString(), inline: false },
-        ...(errors.length
+        ...(rankingErrors.length
           ? [
               {
-                name: 'Détails',
-                value: errors.join('\n').slice(0, 1000),
+                name: 'Détails ranking',
+                value: rankingErrors.join('\n').slice(0, 1000),
+                inline: false,
+              },
+            ]
+          : []),
+        ...(emailErrors.length
+          ? [
+              {
+                name: 'Détails email',
+                value: emailErrors.join('\n').slice(0, 1000),
                 inline: false,
               },
             ]
