@@ -40,7 +40,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "drizzle-orm": "^0.45.2",
-    "ioredis": "^5.11.1",
+    "ioredis": "^6.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-email": "^6.9.1",
