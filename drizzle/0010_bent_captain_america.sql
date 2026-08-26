@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "selected_models" jsonb DEFAULT '["google/gemini-3-flash-preview","anthropic/claude-haiku-4.5","openai/gpt-4o"]'::jsonb NOT NULL;

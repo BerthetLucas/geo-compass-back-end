@@ -4,4 +4,5 @@ export type User = {
   password: string;
   emailNotifications: boolean;
   openRouterApiKey: string | null;
+  selectedModels: string[];
 };

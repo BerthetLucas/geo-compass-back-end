@@ -34,6 +34,7 @@ export class UsersController {
       user.emailNotifications,
       !!user.openRouterApiKey,
       user.email,
+      user.selectedModels,
     );
   }
 
@@ -50,6 +51,7 @@ export class UsersController {
       user.emailNotifications,
       !!user.openRouterApiKey,
       user.email,
+      user.selectedModels,
     );
   }
 

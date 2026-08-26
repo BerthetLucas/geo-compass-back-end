@@ -33,7 +33,9 @@ export class UsersRepository {
 
   async updateSettings(
     id: number,
-    data: Partial<Pick<User, 'emailNotifications' | 'openRouterApiKey'>>,
+    data: Partial<
+      Pick<User, 'emailNotifications' | 'openRouterApiKey' | 'selectedModels'>
+    >,
   ): Promise<User> {
     const [updated] = await this.db
       .update(usersTable)
