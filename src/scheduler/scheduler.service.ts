@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import axios from 'axios';
-import { AVAILABLE_MODELS } from 'src/llm/constants/models';
 import { LlmService } from 'src/llm/llm.service';
 import { RankingService } from 'src/ranking/ranking.service';
 import { UsersService } from 'src/users/users.service';
@@ -31,7 +30,7 @@ export class SchedulerService {
 
     for (const user of users) {
       try {
-        await this.llmService.sendLlmQueries(user.id, AVAILABLE_MODELS);
+        await this.llmService.sendLlmQueries(user.id);
         await this.rankingService.computeAndStoreAllRankings(user.id, today);
       } catch (error) {
         this.logger.error(`Cron failed for user ${user.id}`, error);

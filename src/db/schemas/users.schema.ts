@@ -1,8 +1,9 @@
-import { boolean, integer, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { boolean, integer, jsonb, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { promptsTable } from './prompts.schema';
 import { llmResponseTable } from './llm-response.schema';
 import { globalRankingsTable, modelRankingsTable } from './rankings.schema';
+import { DEFAULT_MODELS } from 'src/llm/constants/models';
 
 export const usersTable = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -10,6 +11,10 @@ export const usersTable = pgTable('users', {
   password: varchar({ length: 255 }).notNull(),
   emailNotifications: boolean().notNull().default(true),
   openRouterApiKey: varchar({ length: 255 }),
+  selectedModels: jsonb('selected_models')
+    .$type<string[]>()
+    .notNull()
+    .default(DEFAULT_MODELS),
 });
 
 export const usersRelations = relations(usersTable, ({ many }) => ({

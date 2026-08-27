@@ -71,6 +71,13 @@
       "when": 1782323269230,
       "tag": "0009_workable_nocturne",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787730796176,
+      "tag": "0010_bent_captain_america",
+      "breakpoints": true
     }
   ]
 }

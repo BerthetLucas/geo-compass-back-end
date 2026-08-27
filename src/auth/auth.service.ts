@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { DEFAULT_MODELS } from 'src/llm/constants/models';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,7 @@ export class AuthService {
       password,
       emailNotifications: true,
       openRouterApiKey: null,
+      selectedModels: DEFAULT_MODELS,
     });
 
     const payload = { sub: user.id, email: user.email };

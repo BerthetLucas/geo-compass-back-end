@@ -37,7 +37,9 @@ export class UsersService {
 
   async updateSettings(
     id: number,
-    data: Partial<Pick<User, 'emailNotifications' | 'openRouterApiKey'>>,
+    data: Partial<
+      Pick<User, 'emailNotifications' | 'openRouterApiKey' | 'selectedModels'>
+    >,
   ): Promise<User> {
     const payload = { ...data };
     if (payload.openRouterApiKey) {

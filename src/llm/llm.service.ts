@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -18,6 +18,8 @@ export type { LlmResponse } from './llm.types';
 
 @Injectable()
 export class LlmService {
+  private readonly logger = new Logger(LlmService.name);
+
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -54,17 +56,23 @@ export class LlmService {
       ),
     );
 
+    const content = response.data?.choices?.[0]?.message?.content;
+    if (content === undefined) {
+      throw new Error(
+        `OpenRouter returned no choices for model ${model}: ${JSON.stringify(
+          response.data,
+        )}`,
+      );
+    }
+
     return {
       model: this.normalizeModelName(model),
-      text: response.data.choices[0].message.content,
+      text: content,
       durationMs: Date.now() - start,
     };
   }
 
-  async sendLlmQueries(
-    userId: number,
-    models: string[],
-  ): Promise<LlmResponse[]> {
+  async sendLlmQueries(userId: number): Promise<LlmResponse[]> {
     const [activePrompts, user] = await Promise.all([
       this.promptRepository.getActivePrompts(userId),
       this.usersService.findOneById(userId),
@@ -75,11 +83,12 @@ export class LlmService {
     }
 
     const userApiKey = user?.openRouterApiKey ?? undefined;
+    const models = user?.selectedModels ?? [];
 
-    const responses = (
+    const settledResponses = (
       await Promise.all(
         activePrompts.map((prompt) =>
-          Promise.all(
+          Promise.allSettled(
             models.map((model) =>
               this.sendLlmQuery(
                 [{ role: 'user', content: prompt.text }],
@@ -92,7 +101,24 @@ export class LlmService {
       )
     ).flat();
 
-    await this.llmRepository.insertResponses(userId, responses);
+    const responses = settledResponses.reduce<LlmResponse[]>((acc, result) => {
+      if (result.status === 'fulfilled') {
+        acc.push(result.value);
+      } else {
+        this.logger.error(
+          `Failed to fetch LLM response for user ${userId}: ${
+            result.reason instanceof Error
+              ? result.reason.message
+              : String(result.reason)
+          }`,
+        );
+      }
+      return acc;
+    }, []);
+
+    if (responses.length) {
+      await this.llmRepository.insertResponses(userId, responses);
+    }
 
     return responses;
   }
