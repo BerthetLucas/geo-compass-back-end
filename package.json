@@ -43,7 +43,7 @@
     "ioredis": "^6.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-email": "^6.9.2",
+    "react-email": "^6.9.3",
     "reflect-metadata": "^0.2.2",
     "resend": "^6.22.0",
     "rxjs": "^7.8.1"
