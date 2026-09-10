@@ -19,7 +19,7 @@ const bearer = (token: string) => ({
   headers: { authorization: `Bearer ${token}` },
 });
 
-describe('UserThrottlerGuard.getTracker (cyber-review.md B1)', () => {
+describe('UserThrottlerGuard.getTracker', () => {
   it('keys by user for a validly signed token', async () => {
     const token = signer.sign({ sub: 42, email: 'a@b.c' });
     await expect(track({ ...bearer(token), ip: '1.1.1.1' })).resolves.toBe(

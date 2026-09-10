@@ -12,23 +12,10 @@ export class PromptService {
   }
 
   async addPrompt(userId: number, text: string): Promise<void> {
-    if (!text || text.trim() === '') {
-      throw new BadRequestException('Prompt text cannot be empty');
-    }
-    if (text.length > LLM_LIMITS.maxPromptLen) {
-      throw new BadRequestException(
-        `Prompt text cannot exceed ${LLM_LIMITS.maxPromptLen} characters`,
-      );
-    }
+    this.assertValidText(text);
 
-    // New prompts default to isActive:true, so this is also the active-prompt cap
-    // for creation (security report 3.1 / cyber-verdict-nodb.md §3).
-    const activeCount = await this.promptRepository.countActiveByUser(userId);
-    if (activeCount >= LLM_LIMITS.maxActivePrompts) {
-      throw new BadRequestException(
-        `Cannot have more than ${LLM_LIMITS.maxActivePrompts} active prompts`,
-      );
-    }
+    // New prompts default to isActive:true, so creation also hits the active cap.
+    await this.assertUnderActiveCap(userId);
 
     await this.promptRepository.addPrompt(userId, text);
   }
@@ -43,30 +30,41 @@ export class PromptService {
     userId: number,
   ): Promise<void> {
     if (updates.text !== undefined) {
-      if (updates.text.trim() === '') {
-        throw new BadRequestException('Prompt text cannot be empty');
-      }
-      if (updates.text.length > LLM_LIMITS.maxPromptLen) {
-        throw new BadRequestException(
-          `Prompt text cannot exceed ${LLM_LIMITS.maxPromptLen} characters`,
-        );
-      }
+      this.assertValidText(updates.text);
     }
 
     if (updates.isActive === true) {
-      // Exclude the prompt being updated: re-activating an already-active prompt
-      // (or a no-op save) must not trip the cap (cyber-review.md N1).
-      const activeCount = await this.promptRepository.countActiveByUser(
-        userId,
-        id,
-      );
-      if (activeCount >= LLM_LIMITS.maxActivePrompts) {
-        throw new BadRequestException(
-          `Cannot have more than ${LLM_LIMITS.maxActivePrompts} active prompts`,
-        );
-      }
+      // Exclude the prompt being updated so re-activating an already-active
+      // prompt (or a no-op save) doesn't count against the cap.
+      await this.assertUnderActiveCap(userId, id);
     }
 
     await this.promptRepository.updatePrompt(id, updates, userId);
+  }
+
+  private assertValidText(text: string): void {
+    if (!text || text.trim() === '') {
+      throw new BadRequestException('Prompt text cannot be empty');
+    }
+    if (text.length > LLM_LIMITS.maxPromptLen) {
+      throw new BadRequestException(
+        `Prompt text cannot exceed ${LLM_LIMITS.maxPromptLen} characters`,
+      );
+    }
+  }
+
+  private async assertUnderActiveCap(
+    userId: number,
+    excludeId?: number,
+  ): Promise<void> {
+    const activeCount = await this.promptRepository.countActiveByUser(
+      userId,
+      excludeId,
+    );
+    if (activeCount >= LLM_LIMITS.maxActivePrompts) {
+      throw new BadRequestException(
+        `Cannot have more than ${LLM_LIMITS.maxActivePrompts} active prompts`,
+      );
+    }
   }
 }

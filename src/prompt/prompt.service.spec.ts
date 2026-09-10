@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { PromptService } from './prompt.service';
 import { LLM_LIMITS } from 'src/llm/constants/limits';
 
-describe('PromptService input caps (security report 3.1)', () => {
+describe('PromptService input caps', () => {
   let repo: {
     addPrompt: jest.Mock;
     updatePrompt: jest.Mock;

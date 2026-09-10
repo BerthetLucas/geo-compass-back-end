@@ -21,18 +21,4 @@ export const LLM_LIMITS = {
   get upstreamTimeoutMs(): number {
     return num('LLM_UPSTREAM_TIMEOUT_MS', 30_000);
   },
-  /**
-   * Best-effort per-instance, per-user daily ceiling for calls on the shared
-   * server key. Not a real budget — see the Map guard in llm.service.ts.
-   */
-  get maxServerKeyCallsPerDay(): number {
-    return num('LLM_MAX_SERVERKEY_CALLS_PER_DAY', 50);
-  },
-  /**
-   * Absolute per-instance daily ceiling for server-key upstream calls across ALL
-   * users combined — last line of defence against distributed multi-account abuse.
-   */
-  get maxServerKeyCallsPerDayGlobal(): number {
-    return num('LLM_MAX_SERVERKEY_CALLS_PER_DAY_GLOBAL', 3000);
-  },
 };

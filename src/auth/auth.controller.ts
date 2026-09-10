@@ -15,8 +15,8 @@ export class AuthController {
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
-  // A real user signs up once. 2/day/IP throttles distributed multi-account
-  // abuse of the shared server key (cyber-verdict-v2.md §3).
+  // A real user signs up once — 2/day/IP slows mass account creation (which
+  // would otherwise multiply the /llm/ per-user limit across sock-puppets).
   @Throttle({ default: { limit: 2, ttl: 86_400_000 } })
   @HttpCode(HttpStatus.CREATED)
   @Post('register')

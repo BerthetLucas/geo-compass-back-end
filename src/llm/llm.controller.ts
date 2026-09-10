@@ -17,17 +17,12 @@ export class LlmController {
   }
 
   // 5 runs / day / user (keyed by verified JWT sub via UserThrottlerGuard).
-  // Business use is ~1/day. Upstream-call cost is bounded separately by the
-  // in-memory guards in LlmService (cyber-verdict-v2.md §2 / §3).
+  // Business use is ~1/day.
   @Throttle({ default: { limit: 5, ttl: 86_400_000 } })
   @Post('/')
   async handleLlmQuery(
     @Request() request: { user: JwtPayload },
   ): Promise<LlmResponse[]> {
-    // Shared server key is the product default; per-user + global in-memory
-    // guards in LlmService bound the spend.
-    return this.llmService.sendLlmQueries(request.user.sub, {
-      allowServerKey: true,
-    });
+    return this.llmService.sendLlmQueries(request.user.sub);
   }
 }
