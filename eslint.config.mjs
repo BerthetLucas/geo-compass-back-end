@@ -6,7 +6,9 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    // ponytail: e2e specs live outside tsconfig's "include" so the typed parser
+    // can't load them; they're not worth a second tsconfig. Unit specs under src/ are linted.
+    ignores: ['eslint.config.mjs', 'test/**'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

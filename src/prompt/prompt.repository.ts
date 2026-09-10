@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Database, DB } from 'src/db/db.module';
 import { promptsTable } from 'src/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, count, eq, ne } from 'drizzle-orm';
 import { type PromptResponse } from './prompt.types';
 
 @Injectable()
@@ -34,6 +34,20 @@ export class PromptRepository {
       text: row.text,
       isActive: row.isActive,
     }));
+  }
+
+  async countActiveByUser(userId: number, excludeId?: number): Promise<number> {
+    const [row] = await this.db
+      .select({ value: count() })
+      .from(promptsTable)
+      .where(
+        and(
+          eq(promptsTable.userId, userId),
+          eq(promptsTable.isActive, true),
+          excludeId === undefined ? undefined : ne(promptsTable.id, excludeId),
+        ),
+      );
+    return row?.value ?? 0;
   }
 
   async addPrompt(userId: number, text: string): Promise<void> {

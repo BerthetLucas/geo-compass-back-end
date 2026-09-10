@@ -30,7 +30,13 @@ export class SchedulerService {
 
     for (const user of users) {
       try {
-        await this.llmService.sendLlmQueries(user.id);
+        await this.llmService.sendLlmQueries(user.id, {
+          allowServerKey: true,
+          // Cron sweeps every user in one pass — the global cap would trip
+          // mid-run and starve the rest (cyber-review-final.md AC-1). Per-user
+          // guard still applies.
+          bypassGlobalCap: true,
+        });
         await this.rankingService.computeAndStoreAllRankings(user.id, today);
       } catch (error) {
         this.logger.error(`Cron failed for user ${user.id}`, error);

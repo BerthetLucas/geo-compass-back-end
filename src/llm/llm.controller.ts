@@ -1,4 +1,5 @@
 import { Controller, Get, Post, UseGuards, Request } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { LlmService } from './llm.service';
 import { type LlmResponse } from './llm.types';
 import { type JwtPayload } from 'src/auth/auth.types';
@@ -15,10 +16,18 @@ export class LlmController {
     return AVAILABLE_MODELS;
   }
 
+  // 5 runs / day / user (keyed by verified JWT sub via UserThrottlerGuard).
+  // Business use is ~1/day. Upstream-call cost is bounded separately by the
+  // in-memory guards in LlmService (cyber-verdict-v2.md §2 / §3).
+  @Throttle({ default: { limit: 5, ttl: 86_400_000 } })
   @Post('/')
   async handleLlmQuery(
     @Request() request: { user: JwtPayload },
   ): Promise<LlmResponse[]> {
-    return this.llmService.sendLlmQueries(request.user.sub);
+    // Shared server key is the product default; per-user + global in-memory
+    // guards in LlmService bound the spend.
+    return this.llmService.sendLlmQueries(request.user.sub, {
+      allowServerKey: true,
+    });
   }
 }
