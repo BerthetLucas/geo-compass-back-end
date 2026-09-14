@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { throttlerConfig } from './common/throttler.config';
+import { UserThrottlerGuard } from './common/user-throttler.guard';
 import { LlmModule } from './llm/llm.module';
 import { GeoModule } from './geo/geo.module';
 import { RankingModule } from './ranking/ranking.module';
@@ -16,6 +20,7 @@ import { EmailModule } from './email/email.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot(throttlerConfig),
     DbModule,
     LlmModule,
     GeoModule,
@@ -28,6 +33,6 @@ import { EmailModule } from './email/email.module';
     EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: UserThrottlerGuard }],
 })
 export class AppModule {}
