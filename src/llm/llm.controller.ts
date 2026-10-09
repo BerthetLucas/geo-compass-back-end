@@ -1,15 +1,16 @@
 import { Controller, Get, Post, UseGuards, Request } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { LlmService } from './llm.service';
-import { type LlmResponse } from './llm.types';
 import { type JwtPayload } from 'src/auth/auth.types';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AVAILABLE_MODELS } from './constants/models';
+import { SendLlmQueriesService } from './service/send-llm-queries.service';
+import { type LlmResponseDto } from './dto/llm.dto';
+import { LlmMapper } from './mapper/llm.mapper';
 
 @UseGuards(AuthGuard)
 @Controller('llm')
 export class LlmController {
-  constructor(private readonly llmService: LlmService) {}
+  constructor(private readonly sendLlmQueriesService: SendLlmQueriesService) {}
 
   @Get('models')
   getAvailableModels(): string[] {
@@ -22,7 +23,10 @@ export class LlmController {
   @Post('/')
   async handleLlmQuery(
     @Request() request: { user: JwtPayload },
-  ): Promise<LlmResponse[]> {
-    return this.llmService.sendLlmQueries(request.user.sub);
+  ): Promise<LlmResponseDto[]> {
+    const responses = await this.sendLlmQueriesService.execute(
+      request.user.sub,
+    );
+    return responses.map((r) => LlmMapper.toDto(r));
   }
 }

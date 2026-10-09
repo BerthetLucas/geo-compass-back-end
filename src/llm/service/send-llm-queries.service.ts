@@ -1,85 +1,28 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import { type AxiosResponse } from 'axios';
-import {
-  type ChatMessage,
-  type LlmResponse,
-  type OpenRouterApiResponse,
-} from './llm.types';
-import { SYSTEM_PROMPT } from './constants/system-prompt';
-import { OPENROUTER_API_URL } from './constants/open-router-url';
-import { AVAILABLE_MODELS } from './constants/models';
-import { LLM_LIMITS } from './constants/limits';
-import { LlmRepository } from './llm.repository';
+import { type LlmResponse } from '../llm.types';
+import { AVAILABLE_MODELS } from '../constants/models';
+import { LLM_LIMITS } from '../constants/limits';
+import { LlmRepository } from '../llm.repository';
 import { PromptRepository } from 'src/prompt/prompt.repository';
-import { type PromptResponse } from 'src/prompt/prompt.types';
-import { UsersService } from 'src/users/users.service';
-
-export type { LlmResponse } from './llm.types';
+import { type Prompt } from 'src/prompt/prompt.types';
+import { FindUserByIdService } from 'src/users/service/find-user-by-id.service';
+import { SendLlmQueryService } from './send-llm-query.service';
 
 @Injectable()
-export class LlmService {
-  private readonly logger = new Logger(LlmService.name);
+export class SendLlmQueriesService {
+  private readonly logger = new Logger(SendLlmQueriesService.name);
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
     private readonly llmRepository: LlmRepository,
     private readonly promptRepository: PromptRepository,
-    private readonly usersService: UsersService,
+    private readonly findUserByIdService: FindUserByIdService,
+    private readonly sendLlmQueryService: SendLlmQueryService,
   ) {}
 
-  async sendLlmQuery(
-    messages: ChatMessage[],
-    model: string,
-    userApiKey?: string,
-  ): Promise<LlmResponse> {
-    const apiKey =
-      userApiKey ?? this.configService.get<string>('OPENROUTER_API_KEY');
-    if (!apiKey) throw new Error('No OpenRouter API key configured');
-    const start = Date.now();
-
-    const messagesWithSystem: ChatMessage[] = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...messages,
-    ];
-
-    const response = await firstValueFrom<AxiosResponse<OpenRouterApiResponse>>(
-      this.httpService.post<OpenRouterApiResponse>(
-        OPENROUTER_API_URL,
-        { model, messages: messagesWithSystem, max_tokens: 500 },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          timeout: LLM_LIMITS.upstreamTimeoutMs,
-        },
-      ),
-    );
-
-    const content = response.data?.choices?.[0]?.message?.content;
-    if (content === undefined) {
-      throw new Error(
-        `OpenRouter returned no choices for model ${model}: ${JSON.stringify(
-          response.data,
-        )}`,
-      );
-    }
-
-    return {
-      model: this.normalizeModelName(model),
-      text: content,
-      durationMs: Date.now() - start,
-    };
-  }
-
-  async sendLlmQueries(userId: number): Promise<LlmResponse[]> {
+  async execute(userId: number): Promise<LlmResponse[]> {
     const [allActivePrompts, user] = await Promise.all([
       this.promptRepository.getActivePrompts(userId),
-      this.usersService.findOneById(userId),
+      this.findUserByIdService.execute(userId),
     ]);
     if (!allActivePrompts.length) return [];
 
@@ -112,7 +55,7 @@ export class LlmService {
    * LLM_LIMITS.fanoutConcurrency in flight at a time.
    */
   private async runFanOut(
-    prompts: PromptResponse[],
+    prompts: Prompt[],
     models: string[],
     userApiKey: string | undefined,
   ): Promise<PromiseSettledResult<LlmResponse>[]> {
@@ -124,7 +67,7 @@ export class LlmService {
       const chunk = tasks.slice(i, i + LLM_LIMITS.fanoutConcurrency);
       const settled = await Promise.allSettled(
         chunk.map(({ prompt, model }) =>
-          this.sendLlmQuery(
+          this.sendLlmQueryService.execute(
             [{ role: 'user', content: prompt.text }],
             model,
             userApiKey,
@@ -156,10 +99,5 @@ export class LlmService {
       );
     }
     return responses;
-  }
-
-  private normalizeModelName(model: string): string {
-    const beforeSlash = model.split('/')[0];
-    return beforeSlash.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   }
 }

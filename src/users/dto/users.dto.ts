@@ -27,20 +27,8 @@ export class UpdateUserSettingsDto {
 }
 
 export class UserSettingsResponseDto {
-  emailNotifications: boolean;
-  hasOpenRouterApiKey: boolean;
-  email: string;
-  selectedModels: string[];
-
-  constructor(
-    emailNotifications: boolean,
-    hasOpenRouterApiKey: boolean,
-    email: string,
-    selectedModels: string[],
-  ) {
-    this.emailNotifications = emailNotifications;
-    this.hasOpenRouterApiKey = hasOpenRouterApiKey;
-    this.email = email;
-    this.selectedModels = selectedModels;
-  }
+  emailNotifications!: boolean;
+  hasOpenRouterApiKey!: boolean;
+  email!: string;
+  selectedModels!: string[];
 }

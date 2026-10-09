@@ -6,3 +6,8 @@ export type User = {
   openRouterApiKey: string | null;
   selectedModels: string[];
 };
+
+export type UserSettings = Pick<
+  User,
+  'emailNotifications' | 'openRouterApiKey' | 'selectedModels'
+>;
