@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PromptRepository } from '../prompt.repository';
 import { type PromptUpdate } from '../prompt.types';
 import { LLM_LIMITS } from 'src/llm/constants/limits';
-import { assertValidText } from '../utils/assert-valid-text';
 
 @Injectable()
 export class UpdatePromptService {
@@ -13,10 +12,6 @@ export class UpdatePromptService {
     updates: PromptUpdate,
     userId: number,
   ): Promise<void> {
-    if (updates.text !== undefined) {
-      assertValidText(updates.text);
-    }
-
     if (updates.isActive === true) {
       const activated = await this.promptRepository.activatePromptIfUnderCap(
         id,

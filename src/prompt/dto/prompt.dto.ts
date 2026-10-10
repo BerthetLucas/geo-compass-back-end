@@ -2,14 +2,17 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsInt,
-  IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
+  MaxLength,
 } from 'class-validator';
+import { LLM_LIMITS } from 'src/llm/constants/limits';
 
 export class CreatePromptDto {
   @IsString()
-  @IsNotEmpty()
+  @Matches(/\S/, { message: 'text cannot be empty' })
+  @MaxLength(LLM_LIMITS.maxPromptLen)
   text!: string;
 }
 
@@ -28,6 +31,8 @@ export class PromptIdParamDto {
 export class UpdatePromptDto {
   @IsOptional()
   @IsString()
+  @Matches(/\S/, { message: 'text cannot be empty' })
+  @MaxLength(LLM_LIMITS.maxPromptLen)
   text?: string;
 
   @IsOptional()
