@@ -46,10 +46,8 @@ export class PromptController {
     @Request() request: { user: JwtPayload },
     @Body() dto: CreatePromptDto,
   ): Promise<void> {
-    await this.addPromptService.execute(
-      request.user.sub,
-      PromptMapper.fromCreateDto(dto),
-    );
+    const prompt = PromptMapper.fromCreateDto(dto);
+    await this.addPromptService.execute(request.user.sub, prompt);
   }
 
   @Post('delete')

@@ -13,10 +13,6 @@ export const LLM_LIMITS = {
   get maxActivePrompts(): number {
     return num('LLM_MAX_ACTIVE_PROMPTS', 5);
   },
-  /** Max concurrent upstream OpenRouter sockets per sendLlmQueries call. */
-  get fanoutConcurrency(): number {
-    return num('LLM_FANOUT_CONCURRENCY', 5);
-  },
   /** Per-request axios timeout for upstream calls. */
   get upstreamTimeoutMs(): number {
     return num('LLM_UPSTREAM_TIMEOUT_MS', 30_000);
