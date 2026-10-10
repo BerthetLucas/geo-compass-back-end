@@ -1,23 +1,27 @@
 import { Controller, Post, Query, Request, UseGuards } from '@nestjs/common';
-import { RankingService } from './ranking.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { type JwtPayload } from '../auth/auth.types';
+import { ComputeAllRankingsService } from './service/compute-all-rankings.service';
+import {
+  ComputeRankingQueryDto,
+  type ComputeRankingResponseDto,
+} from './dto/ranking.dto';
+import { RankingMapper } from './mapper/ranking.mapper';
 
 @UseGuards(AuthGuard)
 @Controller('ranking')
 export class RankingController {
-  constructor(private readonly rankingService: RankingService) {}
+  constructor(
+    private readonly computeAllRankingsService: ComputeAllRankingsService,
+  ) {}
 
   @Post('compute')
   async computeRanking(
     @Request() request: { user: JwtPayload },
-    @Query('date') dateParam?: string,
-  ): Promise<{ success: boolean; date: string }> {
-    const date = dateParam ? new Date(dateParam) : new Date();
-    await this.rankingService.computeAndStoreAllRankings(
-      request.user.sub,
-      date,
-    );
-    return { success: true, date: date.toISOString().split('T')[0] };
+    @Query() query: ComputeRankingQueryDto,
+  ): Promise<ComputeRankingResponseDto> {
+    const date = RankingMapper.fromDto(query);
+    await this.computeAllRankingsService.execute(request.user.sub, date);
+    return RankingMapper.toDto(date);
   }
 }

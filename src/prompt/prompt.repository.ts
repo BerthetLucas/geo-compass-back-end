@@ -2,13 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { type Database, DB } from 'src/db/db.module';
 import { promptsTable } from 'src/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
-import { type PromptResponse } from './prompt.types';
+import { type Prompt, type PromptUpdate } from './prompt.types';
 
 @Injectable()
 export class PromptRepository {
   constructor(@Inject(DB) private db: Database) {}
 
-  async getAllPrompts(userId: number): Promise<PromptResponse[]> {
+  async getAllPrompts(userId: number): Promise<Prompt[]> {
     const rows = await this.db
       .select()
       .from(promptsTable)
@@ -21,7 +21,7 @@ export class PromptRepository {
     }));
   }
 
-  async getActivePrompts(userId: number): Promise<PromptResponse[]> {
+  async getActivePrompts(userId: number): Promise<Prompt[]> {
     const rows = await this.db
       .select()
       .from(promptsTable)
@@ -44,7 +44,7 @@ export class PromptRepository {
 
   async updatePrompt(
     id: number,
-    updates: { text?: string; isActive?: boolean },
+    updates: PromptUpdate,
     userId: number,
   ): Promise<void> {
     await this.db

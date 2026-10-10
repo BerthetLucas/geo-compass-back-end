@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DB, type Database } from 'src/db/db.module';
-import { type User } from './users.types';
+import { type User, type UserSettings } from './users.types';
 import { usersTable } from 'src/db/schemas/users.schema';
 import { eq } from 'drizzle-orm';
 
@@ -31,12 +31,7 @@ export class UsersRepository {
     return user;
   }
 
-  async updateSettings(
-    id: number,
-    data: Partial<
-      Pick<User, 'emailNotifications' | 'openRouterApiKey' | 'selectedModels'>
-    >,
-  ): Promise<User> {
+  async updateSettings(id: number, data: Partial<UserSettings>): Promise<User> {
     const [updated] = await this.db
       .update(usersTable)
       .set(data)

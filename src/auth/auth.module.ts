@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { SignInService } from './service/sign-in.service';
+import { SignUpService } from './service/sign-up.service';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
@@ -19,8 +20,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  providers: [AuthService],
+  providers: [SignInService, SignUpService],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule],
+  exports: [JwtModule],
 })
 export class AuthModule {}

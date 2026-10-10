@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import axios from 'axios';
-import { LlmService } from 'src/llm/llm.service';
-import { RankingService } from 'src/ranking/ranking.service';
-import { UsersService } from 'src/users/users.service';
-import { GeoService } from 'src/geo/geo.service';
+import { SendLlmQueriesService } from 'src/llm/service/send-llm-queries.service';
+import { ComputeAllRankingsService } from 'src/ranking/service/compute-all-rankings.service';
+import { FindAllUsersService } from 'src/users/service/find-all-users.service';
+import { GetGlobalRankingService } from 'src/geo/service/get-global-ranking.service';
 import { EmailService } from 'src/email/email.service';
 
 @Injectable()
@@ -12,10 +12,10 @@ export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
 
   constructor(
-    private readonly usersService: UsersService,
-    private readonly llmService: LlmService,
-    private readonly rankingService: RankingService,
-    private readonly geoService: GeoService,
+    private readonly findAllUsersService: FindAllUsersService,
+    private readonly sendLlmQueriesService: SendLlmQueriesService,
+    private readonly computeAllRankingsService: ComputeAllRankingsService,
+    private readonly getGlobalRankingService: GetGlobalRankingService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -23,15 +23,15 @@ export class SchedulerService {
   async runDailyDataComputation() {
     this.logger.log('Cron started');
     const start = Date.now();
-    const users = await this.usersService.findAll();
+    const users = await this.findAllUsersService.execute();
     const today = new Date();
     const rankingErrors: string[] = [];
     const emailErrors: string[] = [];
 
     for (const user of users) {
       try {
-        await this.llmService.sendLlmQueries(user.id);
-        await this.rankingService.computeAndStoreAllRankings(user.id, today);
+        await this.sendLlmQueriesService.execute(user.id);
+        await this.computeAllRankingsService.execute(user.id, today);
       } catch (error) {
         this.logger.error(`Cron failed for user ${user.id}`, error);
         rankingErrors.push(
@@ -43,7 +43,10 @@ export class SchedulerService {
     for (const user of users) {
       if (!user.emailNotifications) continue;
       try {
-        const ranking = await this.geoService.getGlobalRanking(today, user.id);
+        const ranking = await this.getGlobalRankingService.execute(
+          today,
+          user.id,
+        );
         await this.emailService.sendDailyEmail(user, ranking, today);
       } catch (error) {
         this.logger.error(`Email failed for user ${user.id}`, error);
