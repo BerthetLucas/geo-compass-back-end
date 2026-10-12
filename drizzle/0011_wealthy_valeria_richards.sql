@@ -1,0 +1,2 @@
+ALTER TABLE "llm_responses" ADD COLUMN "promptId" integer;--> statement-breakpoint
+ALTER TABLE "llm_responses" ADD CONSTRAINT "llm_responses_promptId_prompts_id_fk" FOREIGN KEY ("promptId") REFERENCES "public"."prompts"("id") ON DELETE set null ON UPDATE no action;

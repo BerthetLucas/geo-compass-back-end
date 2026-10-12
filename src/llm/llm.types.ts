@@ -7,6 +7,7 @@ export interface LlmResponse {
   model: string;
   text: string;
   durationMs: number;
+  promptId?: number;
 }
 
 export interface OpenRouterChoice {

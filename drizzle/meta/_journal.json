@@ -78,6 +78,13 @@
       "when": 1787730796176,
       "tag": "0010_bent_captain_america",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791828178915,
+      "tag": "0011_wealthy_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

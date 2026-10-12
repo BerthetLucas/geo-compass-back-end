@@ -17,6 +17,7 @@ export class LlmRepository {
         userId,
         model: response.model,
         response: response.text,
+        promptId: response.promptId,
       })),
     );
   }

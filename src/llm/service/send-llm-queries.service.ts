@@ -32,11 +32,13 @@ export class SendLlmQueriesService {
     const settled = await Promise.allSettled(
       prompts.flatMap((prompt) =>
         models.map((model) =>
-          this.sendLlmQueryService.execute(
-            [{ role: 'user', content: prompt.text }],
-            model,
-            user?.openRouterApiKey ?? undefined,
-          ),
+          this.sendLlmQueryService
+            .execute(
+              [{ role: 'user', content: prompt.text }],
+              model,
+              user?.openRouterApiKey ?? undefined,
+            )
+            .then((response) => ({ ...response, promptId: prompt.id })),
         ),
       ),
     );
