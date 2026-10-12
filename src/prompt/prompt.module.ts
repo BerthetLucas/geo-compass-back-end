@@ -4,6 +4,7 @@ import { PromptRepository } from './prompt.repository';
 import { AuthGuard } from '../auth/auth.guard';
 import { AuthModule } from '../auth/auth.module';
 import { GetAllPromptsService } from './service/get-all-prompts.service';
+import { GetActivePromptsService } from './service/get-active-prompts.service';
 import { AddPromptService } from './service/add-prompt.service';
 import { DeletePromptService } from './service/delete-prompt.service';
 import { UpdatePromptService } from './service/update-prompt.service';
@@ -12,6 +13,7 @@ import { UpdatePromptService } from './service/update-prompt.service';
   imports: [AuthModule],
   providers: [
     GetAllPromptsService,
+    GetActivePromptsService,
     AddPromptService,
     DeletePromptService,
     UpdatePromptService,
@@ -19,5 +21,6 @@ import { UpdatePromptService } from './service/update-prompt.service';
     AuthGuard,
   ],
   controllers: [PromptController],
+  exports: [GetActivePromptsService],
 })
 export class PromptModule {}

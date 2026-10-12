@@ -24,3 +24,6 @@ export const promptsRelations = relations(promptsTable, ({ one }) => ({
     references: [usersTable.id],
   }),
 }));
+
+export type PromptRow = typeof promptsTable.$inferSelect;
+export type NewPromptRow = typeof promptsTable.$inferInsert;

@@ -21,7 +21,7 @@ import {
   PromptIdParamDto,
   UpdatePromptDto,
 } from './dto/prompt.dto';
-import { PromptMapper } from './mapper/prompt.mapper';
+import { PromptDtoMapper } from './mapper/prompt-dto.mapper';
 
 @UseGuards(AuthGuard)
 @Controller('prompt')
@@ -38,7 +38,7 @@ export class PromptController {
     @Request() request: { user: JwtPayload },
   ): Promise<PromptDto[]> {
     const prompts = await this.getAllPromptsService.execute(request.user.sub);
-    return prompts.map((prompt) => PromptMapper.toDto(prompt));
+    return prompts.map((prompt) => PromptDtoMapper.toDto(prompt));
   }
 
   @Post()
@@ -46,7 +46,7 @@ export class PromptController {
     @Request() request: { user: JwtPayload },
     @Body() dto: CreatePromptDto,
   ): Promise<void> {
-    const prompt = PromptMapper.fromCreateDto(dto);
+    const prompt = PromptDtoMapper.fromCreateDto(dto);
     await this.addPromptService.execute(request.user.sub, prompt);
   }
 
@@ -66,7 +66,7 @@ export class PromptController {
   ): Promise<void> {
     await this.updatePromptService.execute(
       params.id,
-      PromptMapper.fromUpdateDto(dto),
+      PromptDtoMapper.fromUpdateDto(dto),
       request.user.sub,
     );
   }

@@ -19,7 +19,7 @@ import {
   ModelParamDto,
   PeriodQueryDto,
 } from './dto/geo.dto';
-import { GeoMapper } from './mapper/geo.mapper';
+import { GeoDtoMapper } from './mapper/geo-dto.mapper';
 
 @UseGuards(AuthGuard)
 @Controller('geo')
@@ -37,10 +37,10 @@ export class GeoController {
     @Query() query: DateQueryDto,
   ): Promise<BrandRankingDto[]> {
     const rankings = await this.getGlobalRankingService.execute(
-      GeoMapper.fromDateQuery(query),
+      GeoDtoMapper.fromDateQuery(query),
       request.user.sub,
     );
-    return rankings.map((r) => GeoMapper.toBrandRankingDto(r));
+    return rankings.map((r) => GeoDtoMapper.toBrandRankingDto(r));
   }
 
   @Get('models')
@@ -49,7 +49,7 @@ export class GeoController {
     @Query() query: DateQueryDto,
   ): Promise<string[]> {
     return this.getAvailableModelsService.execute(
-      GeoMapper.fromDateQuery(query),
+      GeoDtoMapper.fromDateQuery(query),
       request.user.sub,
     );
   }
@@ -61,11 +61,11 @@ export class GeoController {
     @Query() query: DateQueryDto,
   ): Promise<BrandRankingDto[]> {
     const rankings = await this.getModelRankingService.execute(
-      GeoMapper.fromDateQuery(query),
+      GeoDtoMapper.fromDateQuery(query),
       params.model,
       request.user.sub,
     );
-    return rankings.map((r) => GeoMapper.toBrandRankingDto(r));
+    return rankings.map((r) => GeoDtoMapper.toBrandRankingDto(r));
   }
 
   @Get('period')
@@ -73,12 +73,12 @@ export class GeoController {
     @Request() request: { user: JwtPayload },
     @Query() query: PeriodQueryDto,
   ): Promise<DailyRankingDto[]> {
-    const { startDate, endDate } = GeoMapper.fromPeriodQuery(query);
+    const { startDate, endDate } = GeoDtoMapper.fromPeriodQuery(query);
     const rankings = await this.getRankingByPeriodService.execute(
       startDate,
       endDate,
       request.user.sub,
     );
-    return rankings.map((r) => GeoMapper.toDailyRankingDto(r));
+    return rankings.map((r) => GeoDtoMapper.toDailyRankingDto(r));
   }
 }

@@ -20,3 +20,5 @@ export interface OpenRouterChoice {
 export interface OpenRouterApiResponse {
   choices: OpenRouterChoice[];
 }
+
+export type StoredLlmResponse = Pick<LlmResponse, 'model' | 'text'>;

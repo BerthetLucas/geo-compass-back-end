@@ -2,7 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { DB, type Database } from 'src/db/db.module';
 import { globalRankingsTable, modelRankingsTable } from 'src/db/schema';
+import { toDateString } from 'src/common/to-date-string';
 import { type BrandRanking } from './ranking.types';
+import { RankingDbMapper } from './mapper/ranking-db.mapper';
 
 @Injectable()
 export class RankingRepository {
@@ -10,34 +12,30 @@ export class RankingRepository {
 
   async insertGlobalRanking(
     userId: number,
-    date: string,
+    date: Date,
     brands: BrandRanking[],
   ): Promise<void> {
     await this.db
       .delete(globalRankingsTable)
       .where(
         and(
-          eq(globalRankingsTable.date, date),
+          eq(globalRankingsTable.date, toDateString(date)),
           eq(globalRankingsTable.userId, userId),
         ),
       );
 
     if (brands.length === 0) return;
 
-    await this.db.insert(globalRankingsTable).values(
-      brands.map((b) => ({
-        userId,
-        date,
-        brand: b.brand,
-        mentions: b.mentions,
-        rank: b.rank,
-      })),
-    );
+    await this.db
+      .insert(globalRankingsTable)
+      .values(
+        brands.map((b) => RankingDbMapper.toGlobalInsertRow(userId, date, b)),
+      );
   }
 
   async insertModelRanking(
     userId: number,
-    date: string,
+    date: Date,
     model: string,
     brands: BrandRanking[],
   ): Promise<void> {
@@ -45,7 +43,7 @@ export class RankingRepository {
       .delete(modelRankingsTable)
       .where(
         and(
-          eq(modelRankingsTable.date, date),
+          eq(modelRankingsTable.date, toDateString(date)),
           eq(modelRankingsTable.model, model),
           eq(modelRankingsTable.userId, userId),
         ),
@@ -53,15 +51,12 @@ export class RankingRepository {
 
     if (brands.length === 0) return;
 
-    await this.db.insert(modelRankingsTable).values(
-      brands.map((b) => ({
-        userId,
-        date,
-        model,
-        brand: b.brand,
-        mentions: b.mentions,
-        rank: b.rank,
-      })),
-    );
+    await this.db
+      .insert(modelRankingsTable)
+      .values(
+        brands.map((b) =>
+          RankingDbMapper.toModelInsertRow(userId, date, model, b),
+        ),
+      );
   }
 }

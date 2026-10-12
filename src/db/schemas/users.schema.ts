@@ -23,3 +23,6 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
   globalRankings: many(globalRankingsTable),
   modelRankings: many(modelRankingsTable),
 }));
+
+export type UserRow = typeof usersTable.$inferSelect;
+export type NewUserRow = typeof usersTable.$inferInsert;

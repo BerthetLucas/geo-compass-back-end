@@ -4,7 +4,7 @@ import {
   UserSettingsResponseDto,
 } from '../dto/users.dto';
 
-export class UsersMapper {
+export class UsersDtoMapper {
   static fromDto(dto: UpdateUserSettingsDto): Partial<UserSettings> {
     return {
       emailNotifications: dto.emailNotifications,

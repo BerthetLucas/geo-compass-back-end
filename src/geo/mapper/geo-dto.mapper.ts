@@ -10,7 +10,7 @@ import {
   type PeriodQueryDto,
 } from '../dto/geo.dto';
 
-export class GeoMapper {
+export class GeoDtoMapper {
   static fromDateQuery(dto: DateQueryDto): Date {
     return new Date(dto.date ?? toDateString(new Date()));
   }
@@ -36,7 +36,7 @@ export class GeoMapper {
   static toDailyRankingDto(daily: DailyRanking): DailyRankingDto {
     const dto = new DailyRankingDto();
     dto.date = daily.date;
-    dto.rankings = daily.rankings.map((r) => GeoMapper.toBrandRankingDto(r));
+    dto.rankings = daily.rankings.map((r) => GeoDtoMapper.toBrandRankingDto(r));
     return dto;
   }
 }

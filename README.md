@@ -51,6 +51,20 @@ Each domain = one NestJS module, with a single responsibility over its table.
 | `ranking` | **Compute + write** snapshots | `RankingRepository` (write) | `global_rankings`, `model_rankings` |
 | `geo` | **Read** snapshots for the frontend | `GeoRepository` (read) | `global_rankings`, `model_rankings` |
 
+**Layers** — each boundary is crossed through a mapper, so services only ever see business types:
+
+```
+HTTP ── DTO ──[XxxDtoMapper]── business types ── service ── business types ──[XxxDbMapper]── Row ── Drizzle
+```
+
+| Layer | Files | Types it handles |
+| --- | --- | --- |
+| Controller | `xxx.controller.ts`, `mapper/xxx-dto.mapper.ts` | DTOs (`dto/xxx.dto.ts`) ↔ business types |
+| Service | `service/*.service.ts` | Business types only (`xxx.types.ts`) — never imports `src/db` |
+| Repository | `xxx.repository.ts`, `mapper/xxx-db.mapper.ts` | Business types ↔ rows (`XxxRow` / `NewXxxRow`, exported by `src/db/schemas/*`) |
+
+A service only injects its own module's repository; another module is reached through that module's exported service.
+
 **Compute pipeline** (pure functions, in `src/ranking/utils/`):
 
 ```

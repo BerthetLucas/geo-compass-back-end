@@ -2,52 +2,47 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, between, eq } from 'drizzle-orm';
 import { DB, type Database } from 'src/db/db.module';
 import { globalRankingsTable, modelRankingsTable } from 'src/db/schema';
+import { toDateString } from 'src/common/to-date-string';
 import {
   type BrandRanking,
   type DailyRanking,
 } from 'src/ranking/ranking.types';
+import { GeoDbMapper } from './mapper/geo-db.mapper';
 
 @Injectable()
 export class GeoRepository {
   constructor(@Inject(DB) private readonly db: Database) {}
 
-  async findGlobalRanking(
-    date: string,
-    userId: number,
-  ): Promise<BrandRanking[]> {
+  async findGlobalRanking(date: Date, userId: number): Promise<BrandRanking[]> {
     const rows = await this.db
       .select()
       .from(globalRankingsTable)
       .where(
         and(
-          eq(globalRankingsTable.date, date),
+          eq(globalRankingsTable.date, toDateString(date)),
           eq(globalRankingsTable.userId, userId),
         ),
       );
 
-    return rows.map((r) => ({
-      rank: r.rank,
-      brand: r.brand,
-      mentions: r.mentions,
-    }));
+    return rows.map((row) => GeoDbMapper.toBrandRanking(row));
   }
 
-  async findAvailableModels(date: string, userId: number): Promise<string[]> {
+  async findAvailableModels(date: Date, userId: number): Promise<string[]> {
     const rows = await this.db
       .selectDistinct({ model: modelRankingsTable.model })
       .from(modelRankingsTable)
       .where(
         and(
-          eq(modelRankingsTable.date, date),
+          eq(modelRankingsTable.date, toDateString(date)),
           eq(modelRankingsTable.userId, userId),
         ),
       );
 
-    return rows.map((r) => r.model);
+    return rows.map((row) => row.model);
   }
 
   async findModelRanking(
-    date: string,
+    date: Date,
     model: string,
     userId: number,
   ): Promise<BrandRanking[]> {
@@ -56,22 +51,18 @@ export class GeoRepository {
       .from(modelRankingsTable)
       .where(
         and(
-          eq(modelRankingsTable.date, date),
+          eq(modelRankingsTable.date, toDateString(date)),
           eq(modelRankingsTable.model, model),
           eq(modelRankingsTable.userId, userId),
         ),
       );
 
-    return rows.map((r) => ({
-      rank: r.rank,
-      brand: r.brand,
-      mentions: r.mentions,
-    }));
+    return rows.map((row) => GeoDbMapper.toBrandRanking(row));
   }
 
   async findRankingByPeriod(
-    startDate: string,
-    endDate: string,
+    startDate: Date,
+    endDate: Date,
     userId: number,
   ): Promise<DailyRanking[]> {
     const rows = await this.db
@@ -80,27 +71,15 @@ export class GeoRepository {
       .where(
         and(
           eq(globalRankingsTable.userId, userId),
-          between(globalRankingsTable.date, startDate, endDate),
+          between(
+            globalRankingsTable.date,
+            toDateString(startDate),
+            toDateString(endDate),
+          ),
         ),
       )
       .orderBy(asc(globalRankingsTable.date));
 
-    const rankingsByDate: Record<string, BrandRanking[]> = {};
-
-    for (const row of rows) {
-      if (!rankingsByDate[row.date]) {
-        rankingsByDate[row.date] = [];
-      }
-      rankingsByDate[row.date].push({
-        rank: row.rank,
-        brand: row.brand,
-        mentions: row.mentions,
-      });
-    }
-
-    return Object.entries(rankingsByDate).map(([date, rankings]) => ({
-      date,
-      rankings,
-    }));
+    return GeoDbMapper.toDailyRankings(rows);
   }
 }

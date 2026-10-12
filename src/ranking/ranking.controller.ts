@@ -6,7 +6,7 @@ import {
   ComputeRankingQueryDto,
   type ComputeRankingResponseDto,
 } from './dto/ranking.dto';
-import { RankingMapper } from './mapper/ranking.mapper';
+import { RankingDtoMapper } from './mapper/ranking-dto.mapper';
 
 @UseGuards(AuthGuard)
 @Controller('ranking')
@@ -20,8 +20,8 @@ export class RankingController {
     @Request() request: { user: JwtPayload },
     @Query() query: ComputeRankingQueryDto,
   ): Promise<ComputeRankingResponseDto> {
-    const date = RankingMapper.fromDto(query);
+    const date = RankingDtoMapper.fromDto(query);
     await this.computeAllRankingsService.execute(request.user.sub, date);
-    return RankingMapper.toDto(date);
+    return RankingDtoMapper.toDto(date);
   }
 }

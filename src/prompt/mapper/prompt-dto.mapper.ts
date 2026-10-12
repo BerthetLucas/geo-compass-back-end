@@ -5,7 +5,7 @@ import {
   type UpdatePromptDto,
 } from '../dto/prompt.dto';
 
-export class PromptMapper {
+export class PromptDtoMapper {
   static fromCreateDto(dto: CreatePromptDto): string {
     return dto.text;
   }

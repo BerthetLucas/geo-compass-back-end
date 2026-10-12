@@ -3,6 +3,7 @@ import { type Database, DB } from 'src/db/db.module';
 import { promptsTable } from 'src/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { type Prompt, type PromptUpdate } from './prompt.types';
+import { PromptDbMapper } from './mapper/prompt-db.mapper';
 
 @Injectable()
 export class PromptRepository {
@@ -14,11 +15,7 @@ export class PromptRepository {
       .from(promptsTable)
       .where(eq(promptsTable.userId, userId));
 
-    return rows.map((row) => ({
-      id: row.id,
-      text: row.text,
-      isActive: row.isActive,
-    }));
+    return rows.map((row) => PromptDbMapper.toDomain(row));
   }
 
   async getActivePrompts(userId: number): Promise<Prompt[]> {
@@ -29,11 +26,7 @@ export class PromptRepository {
         and(eq(promptsTable.userId, userId), eq(promptsTable.isActive, true)),
       );
 
-    return rows.map((row) => ({
-      id: row.id,
-      text: row.text,
-      isActive: row.isActive,
-    }));
+    return rows.map((row) => PromptDbMapper.toDomain(row));
   }
 
   async deletePrompt(id: number, userId: number): Promise<void> {
@@ -49,7 +42,7 @@ export class PromptRepository {
   ): Promise<void> {
     await this.db
       .update(promptsTable)
-      .set(updates)
+      .set(PromptDbMapper.toUpdateRow(updates))
       .where(and(eq(promptsTable.id, id), eq(promptsTable.userId, userId)));
   }
 

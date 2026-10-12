@@ -1,7 +1,7 @@
 import { type LlmResponse } from '../llm.types';
 import { LlmResponseDto } from '../dto/llm.dto';
 
-export class LlmMapper {
+export class LlmDtoMapper {
   static toDto(response: LlmResponse): LlmResponseDto {
     const dto = new LlmResponseDto();
     dto.model = response.model;

@@ -5,7 +5,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { AVAILABLE_MODELS } from './constants/models';
 import { SendLlmQueriesService } from './service/send-llm-queries.service';
 import { type LlmResponseDto } from './dto/llm.dto';
-import { LlmMapper } from './mapper/llm.mapper';
+import { LlmDtoMapper } from './mapper/llm-dto.mapper';
 
 @UseGuards(AuthGuard)
 @Controller('llm')
@@ -27,6 +27,6 @@ export class LlmController {
     const responses = await this.sendLlmQueriesService.execute(
       request.user.sub,
     );
-    return responses.map((r) => LlmMapper.toDto(r));
+    return responses.map((r) => LlmDtoMapper.toDto(r));
   }
 }

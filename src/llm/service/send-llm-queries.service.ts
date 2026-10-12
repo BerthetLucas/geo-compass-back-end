@@ -3,7 +3,7 @@ import { type LlmResponse } from '../llm.types';
 import { AVAILABLE_MODELS } from '../constants/models';
 import { LLM_LIMITS } from '../constants/limits';
 import { LlmRepository } from '../llm.repository';
-import { PromptRepository } from 'src/prompt/prompt.repository';
+import { GetActivePromptsService } from 'src/prompt/service/get-active-prompts.service';
 import { FindUserByIdService } from 'src/users/service/find-user-by-id.service';
 import { SendLlmQueryService } from './send-llm-query.service';
 
@@ -13,14 +13,14 @@ export class SendLlmQueriesService {
 
   constructor(
     private readonly llmRepository: LlmRepository,
-    private readonly promptRepository: PromptRepository,
+    private readonly getActivePromptsService: GetActivePromptsService,
     private readonly findUserByIdService: FindUserByIdService,
     private readonly sendLlmQueryService: SendLlmQueryService,
   ) {}
 
   async execute(userId: number): Promise<LlmResponse[]> {
     const [allActivePrompts, user] = await Promise.all([
-      this.promptRepository.getActivePrompts(userId),
+      this.getActivePromptsService.execute(userId),
       this.findUserByIdService.execute(userId),
     ]);
 

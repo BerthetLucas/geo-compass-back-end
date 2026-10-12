@@ -1,3 +1,5 @@
+import { type StoredLlmResponse } from 'src/llm/llm.types';
+
 // Models sometimes wrap the array in ```json fences or prose, or use single quotes.
 function parseBrandArray(response: string): unknown {
   const array = response.slice(
@@ -12,12 +14,14 @@ function parseBrandArray(response: string): unknown {
   }
 }
 
-export function extractBrands(responses: { response: string }[]): string[] {
+export function extractBrands(
+  responses: Pick<StoredLlmResponse, 'text'>[],
+): string[] {
   const brands: string[] = [];
 
   for (const row of responses) {
     try {
-      const parsed = parseBrandArray(row.response);
+      const parsed = parseBrandArray(row.text);
       if (Array.isArray(parsed)) {
         brands.push(
           ...parsed.filter((b): b is string => typeof b === 'string'),

@@ -4,7 +4,7 @@ import {
   ComputeRankingResponseDto,
 } from '../dto/ranking.dto';
 
-export class RankingMapper {
+export class RankingDtoMapper {
   static fromDto(dto: ComputeRankingQueryDto): Date {
     return dto.date ? new Date(dto.date) : new Date();
   }

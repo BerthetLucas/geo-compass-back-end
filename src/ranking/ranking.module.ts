@@ -17,7 +17,7 @@ import { ComputeModelRankingsService } from './service/compute-model-rankings.se
     RankingRepository,
     AuthGuard,
   ],
-  exports: [RankingRepository, ComputeAllRankingsService],
+  exports: [ComputeAllRankingsService],
   controllers: [RankingController],
 })
 export class RankingModule {}

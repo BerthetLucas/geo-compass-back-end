@@ -3,7 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { SignInService } from './service/sign-in.service';
 import { SignUpService } from './service/sign-up.service';
 import { type AuthTokenDto, SignInDto, SignUpDto } from './dto/auth.dto';
-import { AuthMapper } from './mapper/auth.mapper';
+import { AuthDtoMapper } from './mapper/auth-dto.mapper';
 
 @Controller('auth')
 export class AuthController {
@@ -18,9 +18,9 @@ export class AuthController {
   @Post('login')
   async signIn(@Body() signInDto: SignInDto): Promise<AuthTokenDto> {
     const token = await this.signInService.execute(
-      AuthMapper.fromDto(signInDto),
+      AuthDtoMapper.fromDto(signInDto),
     );
-    return AuthMapper.toDto(token);
+    return AuthDtoMapper.toDto(token);
   }
 
   // A real user signs up once — 2/day/IP slows mass account creation (which
@@ -30,8 +30,8 @@ export class AuthController {
   @Post('register')
   async signUp(@Body() signUpDto: SignUpDto): Promise<AuthTokenDto> {
     const token = await this.signUpService.execute(
-      AuthMapper.fromDto(signUpDto),
+      AuthDtoMapper.fromDto(signUpDto),
     );
-    return AuthMapper.toDto(token);
+    return AuthDtoMapper.toDto(token);
   }
 }

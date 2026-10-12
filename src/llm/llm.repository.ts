@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, gte, lte } from 'drizzle-orm';
 import { DB, type Database } from 'src/db/db.module';
 import { llmResponseTable } from 'src/db/schema';
-import { type LlmResponse } from './llm.types';
+import { type LlmResponse, type StoredLlmResponse } from './llm.types';
+import { LlmDbMapper } from './mapper/llm-db.mapper';
 
 @Injectable()
 export class LlmRepository {
@@ -12,24 +13,24 @@ export class LlmRepository {
     userId: number,
     responses: LlmResponse[],
   ): Promise<void> {
-    await this.db.insert(llmResponseTable).values(
-      responses.map((response) => ({
-        userId,
-        model: response.model,
-        response: response.text,
-        promptId: response.promptId,
-      })),
-    );
+    await this.db
+      .insert(llmResponseTable)
+      .values(
+        responses.map((response) => LlmDbMapper.toInsertRow(userId, response)),
+      );
   }
 
-  async findResponsesByDate(date: Date, userId: number) {
+  async findResponsesByDate(
+    date: Date,
+    userId: number,
+  ): Promise<StoredLlmResponse[]> {
     const startOfDay = new Date(date);
     startOfDay.setUTCHours(0, 0, 0, 0);
 
     const endOfDay = new Date(date);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
-    return this.db
+    const rows = await this.db
       .select()
       .from(llmResponseTable)
       .where(
@@ -39,5 +40,7 @@ export class LlmRepository {
           eq(llmResponseTable.userId, userId),
         ),
       );
+
+    return rows.map((row) => LlmDbMapper.toStoredResponse(row));
   }
 }

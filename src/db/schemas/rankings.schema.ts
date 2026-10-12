@@ -52,3 +52,8 @@ export const modelBrandRankingsTableRelation = relations(
     }),
   }),
 );
+
+export type GlobalRankingRow = typeof globalRankingsTable.$inferSelect;
+export type NewGlobalRankingRow = typeof globalRankingsTable.$inferInsert;
+export type ModelRankingRow = typeof modelRankingsTable.$inferSelect;
+export type NewModelRankingRow = typeof modelRankingsTable.$inferInsert;

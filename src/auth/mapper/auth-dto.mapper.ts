@@ -1,7 +1,7 @@
 import { type AuthToken, type Credentials } from '../auth.types';
 import { AuthTokenDto, type SignInDto, type SignUpDto } from '../dto/auth.dto';
 
-export class AuthMapper {
+export class AuthDtoMapper {
   static fromDto(dto: SignInDto | SignUpDto): Credentials {
     return { email: dto.email, password: dto.password };
   }

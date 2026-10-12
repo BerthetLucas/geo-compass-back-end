@@ -19,7 +19,7 @@ import {
   UpdateUserSettingsDto,
   type UserSettingsResponseDto,
 } from './dto/users.dto';
-import { UsersMapper } from './mapper/users.mapper';
+import { UsersDtoMapper } from './mapper/users-dto.mapper';
 
 @Controller('users')
 export class UsersController {
@@ -40,7 +40,7 @@ export class UsersController {
       throw new NotFoundException();
     }
 
-    return UsersMapper.toDto(user);
+    return UsersDtoMapper.toDto(user);
   }
 
   @UseGuards(AuthGuard)
@@ -52,10 +52,10 @@ export class UsersController {
   ): Promise<UserSettingsResponseDto> {
     const user = await this.updateUserSettingsService.execute(
       req.user.sub,
-      UsersMapper.fromDto(dto),
+      UsersDtoMapper.fromDto(dto),
     );
 
-    return UsersMapper.toDto(user);
+    return UsersDtoMapper.toDto(user);
   }
 
   @UseGuards(AuthGuard)

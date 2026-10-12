@@ -30,3 +30,6 @@ export const llmResponseTableRelation = relations(
     }),
   }),
 );
+
+export type LlmResponseRow = typeof llmResponseTable.$inferSelect;
+export type NewLlmResponseRow = typeof llmResponseTable.$inferInsert;
